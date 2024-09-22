@@ -1,0 +1,216 @@
+---
+title: Course Introduction
+subtitle: Biostat 216
+author: Dr. Hua Zhou @ UCLA
+date: today
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    number-sections: true
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+jupyter:
+  jupytext:
+    formats: 'ipynb,qmd'
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.15.2
+  kernelspec:
+    display_name: Julia 1.9.3
+    language: julia
+    name: julia-1.9
+---
+
+System information (for reproducibility):
+
+```{julia}
+versioninfo()
+```
+
+Load packages:
+
+```{julia}
+using Pkg
+Pkg.activate(pwd())
+Pkg.instantiate()
+```
+
+```{julia}
+using GraphPlot, Graphs, ImageCore, ImageIO, ImageShow, 
+    LinearAlgebra, MatrixDepot, MLDatasets, QuartzImageIO, 
+    RDatasets, StatsModels, TextAnalysis
+```
+
+# Introduction
+
+## Subject of linear algebra
+
+- Vector $\mathbf{x} \in \mathbb{R}^{n}$:
+$$
+  \mathbf{x} = \begin{pmatrix} x_1 \\ x_2 \\ \vdots \\ x_n \end{pmatrix}.
+$$
+
+- Matrix $\mathbf{X} = (x_{ij}) \in \mathbb{R}^{m \times n}$:
+$$
+  \mathbf{X} = \begin{pmatrix}
+  x_{11} & \cdots & x_{1n} \\
+  \vdots & \ddots & \vdots \\
+  x_{m1} & \cdots & x_{mn}
+  \end{pmatrix}.
+$$
+
+## Examples of vectors and matrices
+
+### Design matrix
+
+In statistics, tabular data is often summarized by a **predictor matrix** or **covariate matrix** or **design matrix** or **feature matrix**, which is denoted by $\mathbf{X}$ by convention. Each row of the feature matrix is an observation, and each column is a covariate/measurement/feature.
+
+The famous [Fisher's Iris data](https://en.wikipedia.org/wiki/Iris_flower_data_set):
+
+```{julia}
+# the famous Fisher's Iris data
+# <https://en.wikipedia.org/wiki/Iris_flower_data_set>
+iris = dataset("datasets", "iris")
+```
+
+We can turn a tabular data set into a feature matrix according to a model formula:
+
+```{julia}
+# use full dummy coding (one-hot coding) for categorical variable Species
+iris_X = ModelMatrix(ModelFrame(
+    @formula(1 ~ 1 + SepalLength + SepalWidth + PetalLength + PetalWidth + Species), 
+    iris,
+    contrasts = Dict(:Species => StatsModels.FullDummyCoding()))).m
+```
+
+### Grayscale images
+
+Neural networks can classify handwritten digits in high accuracy. Each handwritten digit is represented by a grayscale image. The famous [MNIST](https://en.wikipedia.org/wiki/MNIST_database) data set contains 60,000 training images and 10,000 test images. Each image is a $28 \times 28$ matrix:
+
+```{julia}
+# first training sample: image, digit label
+# MNIST.traindata(1)
+MNIST(split=:train)[1]
+```
+
+```{julia}
+#| tags: ['"hide_input"']
+# first training digit
+X = MNIST(split=:train)[1][1]
+```
+
+```{julia}
+#| tags: ['"hide_input"']
+# apparently it's digit 5
+convert2image(MNIST, X)
+```
+
+### Color images
+
+[CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) is a collection of 50,000 training images and 10,000 test images, each belonging to 1 of 10 mutually exclusive classes (frog, truck, ...). Each color image is represented by three channels: R (red), G (green), B (blue). Each channel is a $32 \times 32$ intensity matrix.
+
+```{julia}
+# 2nd training image in CIFAR10
+X = CIFAR10(split=:train)[2].features
+```
+
+```{julia}
+# is this a truck?
+convert2image(CIFAR10, X)
+```
+
+### Text data
+
+Text data (webpage, blog, twitter) can be transformed to numeric matrices for statistical analysis as well. For example, the 29 State of the Union Addresses by U.S. presidents, from George W Bush in 1989 to Donald Trump in 2017, can be represented by a $29 \times 9610$ **document term matrix**, where each row stands for one speech and each column is a word that ever appears in these speeches. An entry $x_{ij}$ of the matrix counts the number of occurrences of word $j$ in speech $i$.
+
+```{julia}
+sotupath = joinpath(dirname(pathof(TextAnalysis)), "..", "test/data/sotu")
+Base.Filesystem.readdir(sotupath)
+```
+
+```{julia}
+crps = DirectoryCorpus(sotupath)
+# Donald Trump 2017 SOTU address
+text(crps[29])
+```
+
+```{julia}
+standardize!(crps, StringDocument)
+remove_case!(crps)
+prepare!(crps, strip_punctuation)
+update_lexicon!(crps)
+update_inverse_index!(crps)
+m = DocumentTermMatrix(crps)
+D = dtm(m, :dense)
+```
+
+```{julia}
+m.terms
+```
+
+### Networks
+
+The world wide web (WWW) with $n$ webpages can be described by a **connectivity matrix** or **adjacency matrix** $\mathbf{A} \in \{0,1\}^{n \times n}$ with entry
+\begin{eqnarray*}
+    a_{ij} = \begin{cases}
+    1 & \text{if page $i$ links to page $j$} \\
+    0 & \text{otherwise}
+    \end{cases}.
+\end{eqnarray*}
+According to [Internet Live Stats](https://www.internetlivestats.com/total-number-of-websites/), $n \approx 1.98$ billion now. The smaller [SNP/web-Google](https://snap.stanford.edu/data/web-Google.html) data set contains a web of 916,428 pages.
+
+```{julia}
+mdinfo("SNAP/web-Google") |> show
+```
+
+```{julia}
+md = mdopen("SNAP/web-Google")
+md.A
+```
+
+Here is a visulization of the SNAP/web-Google network
+
+<img src="http://yifanhu.net/GALLERY/GRAPHS/GIF_SMALL/SNAP@web-Google.gif" width=400 align="center"/>
+
+Such a directed graph can also be represented by an **indicence matrix** $\mathbf{B} \in \{-1,0,1\}^{m \times n}$ where $m$ is the number of verticies and $n$ is the number of edges. The entries of an incidence matrix are
+\begin{eqnarray*}
+    b_{ij} = \begin{cases}
+    -1 & \text{if edge $j$ starts at vertex $i$} \\
+    1 & \text{if edge $j$ ends at vertex $i$} \\
+    0 & \text{otherwise}
+    \end{cases}.
+\end{eqnarray*}
+
+Here is a directed graph with 4 nodes and 5 edges.
+
+```{julia}
+# a simple directed graph on GS p16
+g = SimpleDiGraph(4)
+add_edge!(g, 1, 2)
+add_edge!(g, 1, 3)
+add_edge!(g, 2, 3)
+add_edge!(g, 2, 4)
+add_edge!(g, 4, 3)
+gplot(g, nodelabel=["x1", "x2", "x3", "x4"], edgelabel=["b1", "b2", "b3", "b4", "b5"])
+```
+
+```{julia}
+# adjacency matrix A
+convert(Matrix{Int64}, adjacency_matrix(g))
+```
+
+```{julia}
+# incidence matrix B
+convert(Matrix{Int64}, incidence_matrix(g))
+```
+
+## A view of statistics (or data science)
+
+[XKCD #1838](https://xkcd.com/1838/)
+
+<img src="https://imgs.xkcd.com/comics/machine_learning_2x.png" width=400 align="center"/>
