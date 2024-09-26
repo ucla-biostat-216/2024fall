@@ -25,3 +25,5 @@ Manifest.toml
 
 books/
 .Rproj.user
+
+.DS_Store
