@@ -1,0 +1,59 @@
+---
+title: Biostat 216 Homework 1
+subtitle: 'Due Oct 4 @ 11:59pm'
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    number-sections: true
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+jupyter:
+  jupytext:
+    formats: 'ipynb,qmd'
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.15.2
+  kernelspec:
+    display_name: Julia 1.10.5
+    language: julia
+    name: julia-1.10
+---
+
+Submit a PDF (scanned/photographed from handwritten solutions, or converted from RMarkdown or Jupyter Notebook or Quarto) to Gradescope in BruinLearn. 
+
+## Q1. Average and norm
+
+Use the Cauchy-Schwarz inequality to prove that
+$$
+- \frac{1}{\sqrt{n}} \|\mathbf{x}\| \le \frac{1}{n} \sum_{i=1}^n x_i \le \frac{1}{\sqrt{n}} \|\mathbf{x}\|
+$$
+for any $\mathbf{x} \in \mathbb{R}^n$. In other words, $-\operatorname{rms}(\mathbf{x}) \le \operatorname{avg}(\mathbf{x}) \le \operatorname{rms}(\mathbf{x})$.
+
+What are the conditions on $\mathbf{x}$ to have equality in the upper bound? When do we have equality in the lower bound?
+
+## Q2. AM-HM inequality
+
+Use the Cauchy-Schwartz inequality to prove that
+$$
+\frac{1}{n} \sum_{i=1}^n x_i \ge \left( \frac{1}{n} \sum_{i=1}^n \frac{1}{x_i} \right)^{-1}
+$$
+for any $\mathbf{x} \in \mathbb{R}^n$ with positive entries $x_i$. 
+
+The left hand side is called the arithmetic mean (AM) and the right hand side is called the harmonic mean (HM). You may wonder what can be a practical use of such a simple inequality. See this [paper](http://hua-zhou.github.io/media/pdf/LangeZhou14GP.pdf), which uses the AM-HM inequality to derive a class of optimization algorithms for geometric and signomial programming.
+
+## Q3. Bias-variance tradeoff
+
+Prove the formula 
+$$
+\operatorname{avg}(\mathbf{x})^2 + \operatorname{std}(\mathbf{x})^2 = \operatorname{rms}(\mathbf{x})^2
+$$
+using the vector notation and do BV 3.15.
+
+## BV exercises
+
+1.7, 1.9, 1.13, 1.16, 1.20, 3.4, 3.5, 3.12.
