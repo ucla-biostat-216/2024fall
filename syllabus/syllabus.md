@@ -82,6 +82,10 @@ In-class midterm on Oct 26. In-class final exam Dec 11 8am-11am (location TBD).
 
 Attendance (20%) + Homework (20%) + midterm (20%) + final exam (40%).
 
+### Ask For Help
+
+If you have questions with the material, never hesitate to ask for help. You can ask questions during class, on Slack, or in TA and instructor's office hours. Email is less effective.
+
 ### UCLA ADA Policy 
 
 Students needing academic accommodation based on a disability should contact the Center for Accessible Education (CAE) at (310)825-1501 or in person at Murphy Hall A255. When possible, students should contact the CAE within the first two weeks of the term as reasonable notice is needed to coordinate accommodations. For more information visit <https://www.cae.ucla.edu>.
