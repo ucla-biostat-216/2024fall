@@ -21,9 +21,9 @@ jupyter:
       format_version: '1.0'
       jupytext_version: 1.15.2
   kernelspec:
-    display_name: Julia 1.9.3
+    display_name: Julia 1.10.5
     language: julia
-    name: julia-1.9
+    name: julia-1.10
 ---
 
 System information (for reproducibility):
