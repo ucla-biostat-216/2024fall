@@ -76,7 +76,7 @@ Class attendance is **mandatory**. If you are not able to attend a lecture due t
 
 ### Exam
 
-In-class midterm on Oct 26. In-class final exam Dec 11 8am-11am (location TBD).
+In-class midterm on TBD. In-class final exam is Monday Dec 9, 3pm-6pm in CHS 61-235.
 
 ### Final Grade
 
