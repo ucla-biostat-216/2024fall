@@ -9,9 +9,9 @@ BIOSTAT 216 tentative schedule and handouts (expect frequent updates)
 
 BruinLearn: <https://bruinlearn.ucla.edu/courses/190887>
 
-Slack channel: <https://uclabiostat21-b5b7914.slack.com> ([invitation link](https://join.slack.com/t/uclabiostat21-b5b7914/shared_invite/zt-26amuam1x-TGQC0qABb6nvjRe3cAYX6g))
+Slack channel: <https://ucla.enterprise.slack.com/archives/C07MG3XJ69Z> (email your UCLA Slack display name to TA to be added to the Slack channel)
 
-[![](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ucla-biostat-216/2024fall.git/main)
+[![](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ucla-biostat-216/2024fall/HEAD)
 
 | Week | Tuesday | Thursday | Homework |
 |:-------------|:---------------------|:---------------------|:--------------|
