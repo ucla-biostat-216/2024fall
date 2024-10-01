@@ -350,7 +350,7 @@ plot([0; x[1]], [0; x[2]], arrow = true, color = :blue,
 $$
 \|\mathbf{x}\|_1 = |x_1| + \cdots + |x_n|.
 $$
-Also known as **Manhattan Distance** or **Taxicab norm**. The L1 norm is the distance you have to travel between the origin $\mathbf{0}_n$ to the destination $\mathbf{x} = (x_1, \ldots, x_n)'$, in a way that resembles how a taxicab drives between city blocks to arrive at its destination.
+Also known as **Manhattan Distance** or **Taxicab norm**. The L1 norm is the distance you have to travel between the origin $\mathbf{0}_n$ to the destination $\mathbf{x} = (x_1, \ldots, x_n)$, in a way that resembles how a taxicab drives between city blocks to arrive at its destination.
 
 ```{julia}
 #| code-fold: true
