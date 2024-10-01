@@ -1,0 +1,1639 @@
+---
+title: Matrices (BV Chapters 6-10)
+subtitle: Biostat 216
+author: Dr. Hua Zhou @ UCLA
+date: today
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    number-sections: true
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+    link-external-icon: true
+    link-external-newwindow: true
+comments:
+  hypothesis: true
+jupyter:
+  jupytext:
+    formats: 'ipynb,qmd'
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.15.2
+  kernelspec:
+    display_name: Julia 1.10.5
+    language: julia
+    name: julia-1.10
+---
+
+```{julia}
+using Pkg
+Pkg.activate(pwd())
+Pkg.instantiate()
+Pkg.status()
+```
+
+```{julia}
+using BenchmarkTools, Distributions, DSP, ForwardDiff, GraphPlot
+using ImageCore, ImageFiltering, ImageIO, ImageShow, Graphs
+using LinearAlgebra, Plots, Polynomials, Random, SparseArrays, SpecialMatrices
+using Symbolics, TestImages
+Random.seed!(216)
+```
+
+## Notations and terminology
+
+- A matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$
+$$
+\mathbf{A} = \begin{pmatrix}
+a_{11} & \cdots & a_{1n} \\
+\vdots & \ddots & \vdots \\
+a_{m1} & \cdots & a_{mn}
+\end{pmatrix}.
+$$
+    - $a_{ij}$ are the matrix **elements** or **entries** or **coefficients** or **components**.  
+    - **Size** or **dimension** of the matrix is $m \times n$.  
+
+- Many authors use square brackets:
+$$
+\mathbf{A} = \begin{bmatrix}
+a_{11} & \cdots & a_{1n} \\
+\vdots & \ddots & \vdots \\
+a_{m1} & \cdots & a_{mn}
+\end{bmatrix}.
+$$
+
+```{julia}
+# a 3x4 matrix
+A = [0 1 -2.3 0.1;
+    1.3 4 -0.1 0;
+    4.1 -1 0 1.7]
+```
+
+- We say a matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$ is
+    - **tall** if $m > n$;
+    - **wide** if $m < n$;
+    - **square** if $m = n$
+
+```{julia}
+# a tall matrix
+A = randn(5, 3)
+```
+
+```{julia}
+# a wide matrix
+A = randn(2, 4)
+```
+
+```{julia}
+# a square matrix
+A = randn(3, 3)
+```
+
+- **Block matrix** is a rectangular array of matrices
+$$
+\mathbf{A} = \begin{pmatrix}
+\mathbf{B} & \mathbf{C} \\
+\mathbf{D} & \mathbf{E}
+\end{pmatrix}.
+$$
+Elements in the block matrices are the **blocks** or **submatrices**. Dimensions of the blocks must be compatible.
+
+```{julia}
+# blocks
+B = [2; 1] # 2x1
+C = [0 2 3; 5 4 7] # 2x3
+D = [1] # 1x1
+E = [-1 6 0] # 1x3
+# block matrix
+A = [B C; D E]
+```
+
+- Matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$ can be viewed as a $1 \times n$ block matrix with each column as a block
+$$
+\mathbf{A} = \begin{pmatrix}
+\mathbf{a}_1 & \cdots & \mathbf{a}_n
+\end{pmatrix},
+$$
+where 
+$$
+\mathbf{a}_j = \begin{pmatrix} a_{1j} \\ \vdots \\ a_{mj} \end{pmatrix}
+$$
+is the $j$-th column of $\mathbf{A}$.
+
+- $\mathbf{A} \in \mathbb{R}^{m \times n}$ viewed as an $m \times 1$ block matrix with each row as a block
+$$
+\mathbf{A} = \begin{pmatrix}
+\mathbf{b}_1' \\
+\vdots \\
+\mathbf{b}_m'
+\end{pmatrix},
+$$
+where
+$$
+\mathbf{b}_i' = \begin{pmatrix} a_{i1} \, \cdots \, a_{in} \end{pmatrix}
+$$
+is the $i$-th row of $\mathbf{A}$.
+
+- Submatrix: $\mathbf{A}_{i_1:i_2,j_1:j_2}$ or $\mathbf{A}[i_1:i_2, j_1:j_2]$.
+
+```{julia}
+A = [0 1 -2.3 0.1;
+    1.3 4 -0.1 0;
+    4.1 -1 0 1.7]
+```
+
+```{julia}
+# sub-array
+A[2:3, 2:3]
+```
+
+```{julia}
+# a row
+A[3, :]
+```
+
+```{julia}
+# a column
+A[:, 3]
+```
+
+## Some special matrices
+
+- **Zero matrix** $\mathbf{0}_{m \times n} \in \mathbb{R}^{m \times n}$ is the matrix with all entries $a_{ij}=0$. The subscript is sometimes omitted when the dimension is clear from context.
+
+- **One matrix** $\mathbf{1}_{m \times n} \in \mathbb{R}^{m \times n}$ is the  matrix with all entries $a_{ij}=1$. It is often written as $\mathbf{1}_m \mathbf{1}_n'$. 
+
+- **Identity matrix** $\mathbf{I}_n \in \mathbb{R}^{n \times n}$ has entries $a_{ij} = \delta_{ij}$ (Kronecker delta notation):
+$$
+\mathbf{I}_n = \begin{pmatrix} 1 & \cdots & 0 \\
+\vdots & \ddots & \vdots \\
+0 & \cdots & 1
+\end{pmatrix}.
+$$
+The subscript is often omitted when the dimension is clear from context. The columns of $\mathbf{A}$ are the unit vectors
+$$
+\mathbf{I}_n = \begin{pmatrix} \mathbf{e}_1 \, \mathbf{e}_2 \, \cdots \, \mathbf{e}_n \end{pmatrix}.
+$$
+Identity matrix is called the **uniform scaling** in some computer languages.
+
+```{julia}
+# a 3x5 zero matrix
+zeros(3, 5)
+```
+
+```{julia}
+# a 3x5 one matrix
+ones(3, 5)
+```
+
+```{julia}
+@show ones(3, 5) == ones(3) * ones(5)'
+```
+
+```{julia}
+# uniform scaling
+I
+```
+
+```{julia}
+# a 3x3 identity matrix
+I(3)
+```
+
+```{julia}
+# convert to dense matrix
+Matrix(I(3))
+```
+
+- **Symmetric matrix** is a square matrix $\mathbf{A}$ with $a_{ij} = a_{ji}$.
+
+```{julia}
+# a symmetric matrix
+A = [4 3 -2; 3 -1 5; -2 5 0]
+```
+
+```{julia}
+issymmetric(A)
+```
+
+```{julia}
+# turn a general square matrix into a symmetric matrix
+A = randn(3, 3)
+```
+
+```{julia}
+# use upper triangular part as data
+Symmetric(A)
+```
+
+```{julia}
+# use lower triangular part as data
+Symmetric(A, :L)
+```
+
+- A **diagonal matrix** is a square matrix $\mathbf{A}$ with $a_{ij} = 0$ for all $i \ne j$.
+
+```{julia}
+# a diagonal matrix
+A = [-1 0 0; 0 2 0; 0 0 -5]
+```
+
+```{julia}
+# turn a general square matrix into a diagonal matrix
+Diagonal(A)
+```
+
+- A **lower triangular matrix** is a square matrix $\mathbf{A}$ with $a_{ij} = 0$ for all $i < j$.
+
+- A **upper triangular matrix** is a square matrix $\mathbf{A}$ with $a_{ij} = 0$ for all $i > j$.
+
+```{julia}
+# a lower triangular matrix
+A = [4 0 0; 3 -1 0; -1 5 -2]
+```
+
+```{julia}
+# turn a general square matrix into a lower triangular matrix
+A = randn(3, 3)
+LowerTriangular(A)
+```
+
+```{julia}
+# turn a general square matrix into an upper triangular matrix
+UpperTriangular(A)
+```
+
+- A **unit lower triangular matrix** is a square matrix $\mathbf{A}$ with $a_{ij} = 0$ for all $i < j$ and $a_{ii}=1$.
+
+- A **unit upper triangular matrix** is a square matrix $\mathbf{A}$ with $a_{ij} = 0$ for all $i > j$ and $a_{ii}=1$.
+
+```{julia}
+# turn a general square matrix into a unit lower triangular matrix
+UnitLowerTriangular(A)
+```
+
+```{julia}
+# turn a general square matrix into a unit upper triangular matrix
+UnitUpperTriangular(A)
+```
+
+- We say a matrix is **sparse** if most (almost all) of its elements are zero.
+
+    - In computer, a sparse matrix only stores the non-zero entries and their positions. 
+    
+    - Special algorithms exploit the sparsity. Efficiency depends on number of nonzeros and their positions.
+    
+    - Sparse matrix can be visualized by the **spy plot**. 
+
+```{julia}
+# generate a random 50x120 sparse matrix, with sparsity level 0.05
+A = sprandn(50, 120, 0.05)
+```
+
+```{julia}
+# show contents of SparseMatrixCSC{Bool, Int64}
+dump(A)
+```
+
+```{julia}
+Plots.spy(A)
+```
+
+## Matrix operations
+
+- **Scalar-matrix multiplication** or **scalar-matrix product**: For $\beta \in \mathbb{R}$ and $\mathbf{A} \in \mathbb{R}^{m \times n}$,
+$$
+\beta \mathbf{A} = \begin{pmatrix}
+\beta a_{11} & \cdots & \beta a_{1n} \\
+\vdots & \ddots & \vdots \\
+\beta a_{m1} & \cdots & \beta a_{mn}
+\end{pmatrix}.
+$$
+
+```{julia}
+β = 0.5
+A = [0 1 -2.3 0.1;
+    1.3 4 -0.1 0;
+    4.1 -1 0 1.7]
+```
+
+```{julia}
+β * A
+```
+
+- **Matrix addition and substraction**: For $\mathbf{A}, \mathbf{B} \in \mathbb{R}^{m \times n}$,
+$$
+\mathbf{A} + \mathbf{B} = \begin{pmatrix}
+a_{11} + b_{11} & \cdots & a_{1n} + b_{1n} \\
+\vdots & \ddots & \vdots \\
+a_{m1} + b_{m1} & \cdots & a_{mn} + b_{mn}
+\end{pmatrix}, \quad \mathbf{A} - \mathbf{B} = \begin{pmatrix}
+a_{11} - b_{11} & \cdots & a_{1n} - b_{1n} \\
+\vdots & \ddots & \vdots \\
+a_{m1} - b_{m1} & \cdots & a_{mn} - b_{mn}
+\end{pmatrix}.
+$$ 
+
+```{julia}
+A = [0 1 -2.3 0.1;
+    1.3 4 -0.1 0;
+    4.1 -1 0 1.7]
+```
+
+```{julia}
+B = ones(size(A))
+```
+
+```{julia}
+A + B
+```
+
+```{julia}
+A - B
+```
+
+- Composition of scalar-matrix product and and matrix addition/substraction is linear combination of matrices of same size
+$$
+\alpha_1 \mathbf{A}_1 + \cdots + \alpha_k \mathbf{A}_k
+$$
+One example of linear combination of matrices is color-image-to-grayscale-image conversion.
+
+```{julia}
+rgb_image = testimage("lighthouse")
+```
+
+```{julia}
+# R(ed) channel
+channelview(rgb_image)[1, :, :]
+```
+
+```{julia}
+# G(reen) channel
+channelview(rgb_image)[2, :, :]
+```
+
+```{julia}
+# B(lue) channel
+channelview(rgb_image)[3, :, :]
+```
+
+```{julia}
+gray_image = Gray.(rgb_image)
+```
+
+```{julia}
+channelview(gray_image)
+```
+
+The gray image are computed by taking a linear combination of the R(ed), G(green), and B(lue) channels.
+$$
+0.299 \mathbf{R} + 0.587 \mathbf{G} + 0.114 \mathbf{B}
+$$
+according to [Rec. ITU-R BT.601-7](https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.601-7-201103-I!!PDF-E.pdf).
+
+```{julia}
+@show 0.299 * channelview(rgb_image)[1, 1, 1] + 
+    0.587 * channelview(rgb_image)[2, 1, 1] + 
+    0.114 * channelview(rgb_image)[3, 1, 1]
+@show channelview(gray_image)[1, 1];
+```
+
+```{julia}
+# first pixel
+rgb_image[1]
+```
+
+```{julia}
+# first pixel converted to gray scale
+Gray{N0f8}(0.299 * rgb_image[1].r + 0.587 * rgb_image[1].g + 0.114 * rgb_image[1].b)
+```
+
+- The **transpose** of a matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$ is the $n \times m$ matrix
+$$
+\mathbf{A}' = \begin{pmatrix}
+a_{11} & \cdots & a_{m1} \\
+\vdots & \ddots & \vdots \\
+a_{1n} & \cdots & a_{mn}
+\end{pmatrix}.
+$$
+In words, we swap $a_{ij} \leftrightarrow a_{ji}$ for all $i, j$.
+
+- Alternative notation: $\mathbf{A}^T$, $\mathbf{A}^t$.
+
+- Properties of matrix transpose:
+
+    - A symmetric matrix satisfies $\mathbf{A} = \mathbf{A}'$.
+
+    - $(\beta \mathbf{A})' = \beta \mathbf{A}'$.
+
+    - $(\mathbf{A} + \mathbf{B})' = \mathbf{A}' + \mathbf{B}'$.
+
+```{julia}
+A
+```
+
+```{julia}
+A'
+```
+
+```{julia}
+# note it's not rotating the picture!
+rgb_image'
+```
+
+- Transpose a block matrix
+$$
+\begin{pmatrix}
+\mathbf{A} & \mathbf{B} \\
+\mathbf{C} & \mathbf{D}
+\end{pmatrix}' = \begin{pmatrix}
+\mathbf{A}' & \mathbf{C}' \\
+\mathbf{B}' & \mathbf{D}'
+\end{pmatrix}.
+$$
+
+## Matrix norm
+
+- The **(Frobenius) norm** or **norm** of a matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$ is defined as
+$$
+\|\mathbf{A}\| = \sqrt{\sum_{i,j} a_{ij}^2}.
+$$
+Often we use $\|\mathbf{A}\|_{\text{F}}$ to differentiate with other matrix norms.
+
+- Define the $\operatorname{vec}$ operator that stacks the columns of a matrix into a long vector
+
+$$
+\operatorname{vec} \mathbf{A} = \begin{pmatrix}
+a_{11} \\
+\vdots \\
+a_{m1} \\
+\vdots \\
+a_{1n} \\
+\vdots \\
+a_{mn}
+\end{pmatrix}.
+$$
+It is easy to see that $\|\mathbf{A}\| = \|\operatorname{vec} \mathbf{A}\|$.
+
+- Similar to the vector norm, matrix norm satisfies the following properties:
+
+    1. Positive definiteness: $\|\mathbf{A}\| \ge 0$. $\|\mathbf{A}\| = 0$ if and only if $\mathbf{A}=\mathbf{0}_{m \times n}$.
+    
+    2. Homogeneity: $\|\alpha \mathbf{A}\| = |\alpha| \|\mathbf{A}\|$ for any scalar $\alpha$ and matrix $\mathbf{A}$.  
+    
+    3. Triangle inequality: $\|\mathbf{A} + \mathbf{B}\| \le \|\mathbf{A}\| + \|\mathbf{B}\|$ for any $\mathbf{A}, \mathbf{B} \in \mathbb{R}^{m \times n}$.  Proof: TODO in class.
+    
+    4. A new rule for (any) matrix norm: $\|\mathbf{A} \mathbf{B}\| \le \|\mathbf{A}\| \|\mathbf{B}\|$. Proof: HW2.
+
+```{julia}
+A = [0 1 -2.3 0.1;
+    1.3 4 -0.1 0;
+    4.1 -1 0 1.7]
+```
+
+```{julia}
+# Frobenius norm 
+norm(A)
+```
+
+```{julia}
+# manually calculate Frobenius norm
+sqrt(sum(abs2, A))
+```
+
+## Matrix-matrix and matrix-vector multiplications
+
+### Matrix-matrix multiplication
+
+- **Matrix-matrix multiplication** or **matrix-matrix product**: For $\mathbf{A} \in \mathbb{R}^{m \times n}$ and $\mathbf{B} \in \mathbb{R}^{n \times p}$,
+$$
+\mathbf{C} = \mathbf{A} \mathbf{B}
+$$
+is the $m \times p$ matrix with entries
+$$
+c_{ij} = a_{i1} b_{1j} + a_{i2} b_{2k} + \cdots + a_{in} b_{nj} = \sum_{k=1}^n a_{ik} b_{kj}.
+$$
+Note the number of columns in $\mathbf{A}$ must be equal to the number of rows in $\mathbf{B}$.
+
+- Vector inner product $\mathbf{a}' \mathbf{b}$ is a special case of matrix-matrix multiplication with $m=p=1$.
+$$
+\mathbf{a}' \mathbf{b} = \begin{pmatrix} a_1 \, \cdots \, a_n \end{pmatrix} \begin{pmatrix} b_1 \\ \vdots \\ b_n \end{pmatrix} = \sum_{i=1}^n a_i b_i.
+$$
+
+- View of matrix-matrix multiplication as inner products. $c_{ij}$ is the inner product of the $i$-th row of $\mathbf{A}$ and the $j$-th column of $\mathbf{B}$:
+$$
+\begin{pmatrix}
+& & \\
+& c_{ij} & \\
+& & 
+\end{pmatrix} = \begin{pmatrix}
+& & \\ - & \mathbf{a}_i' & - \\ & &
+\end{pmatrix} \begin{pmatrix}
+& | & \\
+& \mathbf{b}_j & \\
+& | &
+\end{pmatrix} = \begin{pmatrix}
+& & \\
+a_{i1} & \cdots & a_{in} \\
+& &
+\end{pmatrix} \begin{pmatrix}
+& b_{1j} & \\
+& \vdots & \\
+& b_{nj} &
+\end{pmatrix}.
+$$
+
+```{julia}
+# an example with m, n, p = 2, 3, 2
+A = [-1.5 3 2; 1 -1 0]
+```
+
+```{julia}
+B = [-1 -1; 0 -2; 1 0]
+```
+
+```{julia}
+C = A * B
+```
+
+```{julia}
+# check C[2,3] = A[2,:]'B[:,3]
+C[2, 2] ≈ A[2, :]'B[:, 2]
+```
+
+### Matrix-vector multiplication
+
+- **Matrix-vector multiplication** or **matrix-vector product** are special cases of the matrix-matrix multiplication with $m=1$ or $p=1$. 
+
+    - (Inner product view) For $\mathbf{A} \in \mathbb{R}^{m \times n}$ and $\mathbf{b} \in \mathbb{R}^{n}$,
+$$
+\mathbf{A} \mathbf{b} = \begin{pmatrix} - & \mathbf{c}_1' & - \\
+& \vdots & \\ - & \mathbf{c}_m' & - 
+\end{pmatrix} \begin{pmatrix} | \\ \mathbf{b} \\ | \end{pmatrix} = \begin{pmatrix} \mathbf{c}_1' \mathbf{b} \\ \vdots \\ \mathbf{c}_m' \mathbf{b} \end{pmatrix} \in \mathbb{R}^m.
+$$
+(Linear combination view) Alternatively, $\mathbf{A} \mathbf{b}$ can be viewed as a linear combination of columns of $\mathbf{A}$
+$$
+\mathbf{A} \mathbf{b} = \begin{pmatrix}
+| & & | \\
+\mathbf{a}_1 & \cdots & \mathbf{a}_n \\
+| & & |
+\end{pmatrix} \begin{pmatrix} b_1 \\ \vdots \\ b_n \end{pmatrix} = b_1 \mathbf{a}_1 + \cdots + b_n \mathbf{a}_n.
+$$
+
+    - (Inner product view) For $\mathbf{a} \in \mathbb{R}^n$ and $\mathbf{B} \in \mathbb{R}^{n \times p}$,
+$$
+\mathbf{a}' \mathbf{B} = \begin{pmatrix} - & \mathbf{a}' & - \end{pmatrix} \begin{pmatrix}
+| & & | \\
+\mathbf{b}_1 & & \mathbf{b}_p \\
+| & & |
+\end{pmatrix} = (\mathbf{a}' \mathbf{b}_1 \, \ldots \, \mathbf{a}'\mathbf{b}_p).
+$$
+(Linear combination view) Alternatively, $\mathbf{a}' \mathbf{B}$ can be viewed as a linear combination of the rows of $\mathbf{B}$
+$$
+\mathbf{a}' \mathbf{B} = (a_1 \, \ldots \, a_n) \begin{pmatrix} - & \mathbf{b}_1' & - \\
+& & \\ - & \mathbf{b}_n' & -
+\end{pmatrix} = a_1 \mathbf{b}_1' + \cdots + a_n \mathbf{b}_n'.
+$$
+
+- View of matrix mulplication $\mathbf{C} = \mathbf{A} \mathbf{B}$ as matrix-vector products. 
+    
+    - $j$-th column of $\mathbf{C}$ is equal to product of $\mathbf{A}$ and $j$-th column of $\mathbf{B}$
+$$
+\begin{pmatrix}
+& | & \\
+& \mathbf{c}_j & \\
+& | & 
+\end{pmatrix} = \mathbf{A} \begin{pmatrix}
+& | & \\
+& \mathbf{b}_j & \\
+& | & 
+\end{pmatrix}.
+$$
+
+    - $i$-th row of $\mathbf{C}$ is equal to product of $i$-th row of $\mathbf{A}$ and $\mathbf{B}$
+$$
+\begin{pmatrix}
+& & \\ - & \mathbf{c}_i' & - \\ & & 
+\end{pmatrix} = \begin{pmatrix}
+& & \\ - & \mathbf{a}_i' & - \\ & & 
+\end{pmatrix} \mathbf{B}.
+$$
+
+```{julia}
+# check C[:, 2] = A * B[:, 2]
+C[:, 2] ≈ A * B[:, 2]
+```
+
+```{julia}
+# check C[2, :]' = A[2, :]' * B
+# note C[2, :] returns a column vector in Julia!
+C[2, :]' ≈ A[2, :]'B
+```
+
+### Exercise - multiplication of adjacency matrix
+
+Here is a directed graph with 4 nodes and 5 edges.
+
+```{julia}
+# a simple directed graph on GS p16
+g = SimpleDiGraph(4)
+add_edge!(g, 1, 2)
+add_edge!(g, 1, 3)
+add_edge!(g, 2, 3)
+add_edge!(g, 2, 4)
+add_edge!(g, 4, 3)
+gplot(g, nodelabel=["x1", "x2", "x3", "x4"], edgelabel=["b1", "b2", "b3", "b4", "b5"])
+```
+
+The adjacency matrix $\mathbf{A}$ has entries
+\begin{eqnarray*}
+    a_{ij} = \begin{cases}
+    1 & \text{if node $i$ links to node $j$} \\
+    0 & \text{otherwise}
+    \end{cases}.
+\end{eqnarray*}
+Note this definition differs from the BV book (p112).
+
+```{julia}
+# adjacency matrix A
+A = convert(Matrix{Int64}, adjacency_matrix(g))
+```
+
+Give a graph interpretation of $\mathbf{A}^2 = \mathbf{A} \mathbf{A}$, $\mathbf{A}^3 = \mathbf{A} \mathbf{A} \mathbf{A}$, ...
+
+```{julia}
+A * A
+```
+
+```{julia}
+A * A * A
+```
+
+**Answer**: $(\mathbf{A}^k)_{ij}$ counts the number of paths from node $i$ to node $j$ in exactly $k$ steps.
+
+### Properties of matrix multiplications
+
+- Associative: 
+$$
+(\mathbf{A} \mathbf{B}) \mathbf{C} = \mathbf{A} (\mathbf{B} \mathbf{C}) = \mathbf{A} \mathbf{B} \mathbf{C}.
+$$
+
+- Associative with scalar-matrix multiplication: 
+$$
+(\alpha \mathbf{B}) \mathbf{C} = \alpha \mathbf{B} \mathbf{C} = \mathbf{B} (\alpha \mathbf{C}).
+$$
+
+- Distributive with sum: 
+$$
+(\mathbf{A} + \mathbf{B}) \mathbf{C} = \mathbf{A} \mathbf{C} + \mathbf{B} \mathbf{C}, \quad \mathbf{A} (\mathbf{B} + \mathbf{C}) = \mathbf{A} \mathbf{B} + \mathbf{A} \mathbf{C}.
+$$
+
+- Transpose of product:
+$$
+(\mathbf{A} \mathbf{B})' = \mathbf{B}' \mathbf{A}'.
+$$
+
+- **Not** commutative: In general,
+$$
+\mathbf{A} \mathbf{B} \ne \mathbf{B} \mathbf{A}.
+$$
+There are exceptions, e.g., $\mathbf{A} \mathbf{I} = \mathbf{I} \mathbf{A}$ for square $\mathbf{A}$.
+
+```{julia}
+A = randn(3, 2)
+B = randn(2, 4)
+A * B
+```
+
+```{julia}
+# dimensions are even incompatible!
+B * A
+```
+
+- For two vectors $\mathbf{a} \in \mathbb{R}^m$ and $\mathbf{b} \in \mathbb{R}^n$, the matrix
+$$
+\mathbf{a} \mathbf{b}' = \begin{pmatrix} a_1 \\ \vdots \\ a_m \end{pmatrix} \begin{pmatrix} b_1 \, \cdots \, b_n \end{pmatrix} = \begin{pmatrix}
+a_1 b_1 & \cdots & a_1 b_n \\
+\vdots &  & \vdots \\
+a_m b_1 & \cdots & a_m b_n
+\end{pmatrix}
+$$
+is called the **outer product** of $\mathbf{a}$ and $\mathbf{b}$. Apparently $\mathbf{a} \mathbf{b}' \ne \mathbf{b}' \mathbf{a}$ unless both are scalars.
+
+- View of matrix-matrix product $\mathbf{C} = \mathbf{A} \mathbf{B}$ as sum of outer products:
+$$
+\mathbf{C} = \begin{pmatrix}
+| & & | \\
+\mathbf{a}_1 & \cdots & \mathbf{a}_n \\
+| & & |
+\end{pmatrix} \begin{pmatrix} - & \mathbf{b}_1' & - \\ & \vdots & \\ - & \mathbf{b}_n' & -
+\end{pmatrix} = \mathbf{a}_1 \mathbf{b}_1' + \cdots + \mathbf{a}_n \mathbf{b}_n'.
+$$
+
+```{julia}
+m, n, p = 3, 2, 4
+A = randn(m, n)
+B = randn(n, p)
+C = A * B
+@show C ≈ A[:, 1] * B[1, :]' + A[:, 2] * B[2, :]'
+```
+
+### Gram matrix
+
+- Let $\mathbf{A} \in \mathbb{R}^{m \times n}$ with columns $\mathbf{a}_1, \ldots, \mathbf{a}_n$. The matrix product
+$$
+\mathbf{G} = \mathbf{A}' \mathbf{A} = \begin{pmatrix} - & \mathbf{a}_1' & - \\ & \vdots & \\ - & \mathbf{a}_n' & - \end{pmatrix} \begin{pmatrix} | & & | \\ \mathbf{a}_1 & \cdots & \mathbf{a}_n \\ | & & | \end{pmatrix}
+= \begin{pmatrix} \mathbf{a}_1' \mathbf{a}_1 & \cdots & \mathbf{a}_1' \mathbf{a}_n \\
+\vdots & \ddots & \vdots \\
+\mathbf{a}_n' \mathbf{a}_1 & \cdots & \mathbf{a}_n' \mathbf{a}_n
+\end{pmatrix} \in \mathbb{R}^{n \times n}
+$$
+is called the **Gram matrix**.
+
+- Gram matrix is symmetric: $\mathbf{G}' = (\mathbf{A}' \mathbf{A})' = \mathbf{A}' (\mathbf{A}')' = \mathbf{A}' \mathbf{A} = \mathbf{G}$.
+
+- We also call $\mathbf{A} \mathbf{A}'$ a Gram matrix.
+
+```{julia}
+A = randn(5, 3)
+```
+
+```{julia}
+# 3x3
+A' * A
+```
+
+```{julia}
+# 5x5
+A * A'
+```
+
+### Linear independence of columns
+
+- A set of vectors $\mathbf{a}_1, \ldots, \mathbf{a}_k \in \mathbb{R}^{n}$ are linearly independent if, for the matrix $\mathbf{A} = (\mathbf{a}_1 \, \ldots \, \mathbf{a}_k) \in \mathbb{R}^{n \times k}$,
+$$
+\mathbf{A} \mathbf{b} = b_1 \mathbf{a}_1 + \cdots + b_k \mathbf{a}_k = \mathbf{0}_n
+$$
+implies that $\mathbf{b} = \mathbf{0}_k$. In this case, we also say $\mathbf{A}$ has linearly independent columns.
+
+### Block matrix-matrix multiplication
+
+- Matrix-matrix multiplication in block form:
+$$
+\begin{pmatrix} \mathbf{A} & \mathbf{B} \\ \mathbf{C} & \mathbf{D} \end{pmatrix} \begin{pmatrix} \mathbf{W} & \mathbf{Y} \\ \mathbf{X} & \mathbf{Z} \end{pmatrix} = \begin{pmatrix} \mathbf{A} \mathbf{W} + \mathbf{B} \mathbf{X} & \mathbf{A} \mathbf{Y} + \mathbf{B} \mathbf{Z} \\ \mathbf{C} \mathbf{W} + \mathbf{D} \mathbf{X} & \mathbf{C} \mathbf{Y} + \mathbf{D} \mathbf{Z} \end{pmatrix}.
+$$
+Submatrices need to have compatible dimensions.
+
+## Linear functions and operators
+
+- The matrix-vector product $\mathbf{y} = \mathbf{A} \mathbf{x}$ can be viewed as a function acting on input $\mathbf{x} \in \mathbb{R}^n$ and outputing $\mathbf{y} \in \mathbb{R}^m$. In this sense, we also say any matrix $\mathbf{A}$ is a linear operator.
+
+- A function $f: \mathbb{R}^n \mapsto \mathbb{R}^m$ is **linear** if 
+$$
+f(\alpha \mathbf{x} + \beta \mathbf{y}) = \alpha f(\mathbf{x}) + \beta f(\mathbf{y}).
+$$
+for all scalars $\alpha, \beta$ and vectors $\mathbf{x}, \mathbf{y} \in \mathbb{R}^n$.
+
+- Definition of linear function implies that the superposition property holds for any linear combination
+$$
+f(\alpha_1 \mathbf{x}_1 + \cdots + \alpha_p \mathbf{x}_p) = \alpha_1 f(\mathbf{x}_1) + \cdots + \alpha_p f(\mathbf{x}_p).
+$$
+
+- Any linear function is a matrix-vector product and vice versa.
+
+    1. For a fixed matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$, the function $f: \mathbb{R}^n \mapsto \mathbb{R}^m$ defined by
+    $$
+    f(\mathbf{x}) = \mathbf{A} \mathbf{x}
+    $$
+    is linear, because $f(\alpha \mathbf{x} + \beta \mathbf{y}) = \mathbf{A} (\alpha \mathbf{x} + \beta \mathbf{y}) = \alpha \mathbf{A} \mathbf{x} + \beta \mathbf{A} \mathbf{y} = \alpha f(\mathbf{x}) + \beta f(\mathbf{y})$.
+
+    2. Any linear function is a matrix-vector product because
+    \begin{eqnarray*}
+    f(\mathbf{x}) &=& f(x_1 \mathbf{e}_1 + \cdots + x_n \mathbf{e}_n) \\
+    &=& x_1 f(\mathbf{e}_1) + \cdots + x_n f(\mathbf{e}_n) \\
+    &=& \begin{pmatrix}
+    f(\mathbf{e}_1) \, \cdots \, f(\mathbf{e}_n)
+    \end{pmatrix} \mathbf{x}.
+    \end{eqnarray*}
+    Hence $f(\mathbf{x}) = \mathbf{A} \mathbf{x}$ with $\mathbf{A} = \begin{pmatrix} f(\mathbf{e}_1) \, \cdots \, f(\mathbf{e}_n) \end{pmatrix}$.
+
+### Permutation
+
+- **Reverser matrix**:
+$$
+A = \begin{pmatrix}
+0 & \cdots & 1 \\
+\vdots & .^{.^{.}} & \vdots \\
+1 & \cdots & 0
+\end{pmatrix}. 
+$$
+For any vector $\mathbf{x} \in \mathbb{R}^n$,
+$$
+\mathbf{A} \begin{pmatrix} x_1 \\ x_2 \\ \vdots \\ x_{n-1} \\ x_n \end{pmatrix} = \begin{pmatrix} x_n \\ x_{n-1} \\ \vdots \\ x_2 \\ x_1 \end{pmatrix}.
+$$
+
+```{julia}
+# a reverser matrix
+n = 5
+A = [i + j == n + 1 ? 1 : 0 for i in 1:n, j in 1:n]
+```
+
+```{julia}
+x = Vector(1:n)
+```
+
+```{julia}
+A * x
+```
+
+- **Circular shift matrix**
+$$
+\mathbf{A} = \begin{pmatrix}
+0 & 0 & \cdots & 0 & 1 \\
+1 & 0 & \cdots & 0 & 0 \\
+0 & 1 & \cdots & 0 & 0 \\
+\vdots & \vdots & \ddots & \vdots & \vdots \\
+0 & 0 & \cdots & 1 & 0
+\end{pmatrix}.
+$$
+For any vector $\mathbf{x} \in \mathbb{R}^n$,
+$$
+\quad \mathbf{A} \begin{pmatrix} x_1 \\ x_2 \\ \vdots \\ x_{n-1} \\ x_n \end{pmatrix} = \begin{pmatrix} x_n \\ x_1 \\ x_2 \\ \vdots \\ x_{n-1} \end{pmatrix}.
+$$
+
+```{julia}
+n = 5
+A = [mod(i - j, n) == 1 ? 1 : 0 for i in 1:n, j in 1:n]
+```
+
+```{julia}
+x = Vector(1:n)
+```
+
+```{julia}
+A * x
+```
+
+```{julia}
+A * (A * x)
+```
+
+- The reverser and circular shift matrices are examples of permutation matrix. 
+
+    A **permutation matrix** is a square 0-1 matrix with one element 1 in each row and one element 1 in each column. 
+
+    Equivalently, a permutation matrix is the identity matrix with columns reordered. 
+    
+    Equivalently, a permutation matrix is the identity matrix with rows reordered. 
+    
+    $\mathbf{A} \mathbf{x}$ is a permutation of elements in $\mathbf{x}$.
+
+```{julia}
+σ = randperm(n)
+```
+
+```{julia}
+# permute the rows of identity matrix
+P = I(n)[σ, :]
+```
+
+```{julia}
+x = Vector(1:n)
+```
+
+```{julia}
+# operator
+P * x
+```
+
+```{julia}
+x[σ]
+```
+
+### Rotation
+
+- A **rotation matrix** in the plane $\mathbb{R}^2$:
+$$
+\mathbf{A} = \begin{pmatrix}
+\cos \theta & - \sin \theta \\
+\sin \theta & \cos \theta
+\end{pmatrix}.
+$$
+$\mathbf{A} \mathbf{x}$ is $\mathbf{x}$ rotated counterclockwise over an angle $\theta$.
+
+```{julia}
+θ = π/4
+A = [cos(θ) -sin(θ); sin(θ) cos(θ)]
+```
+
+```{julia}
+# rotate counterclockwise 45 degree
+x1 = [2, 1]
+x2 = A * x1
+```
+
+```{julia}
+# rotate counterclockwise 90 degree
+x3 = A * x2
+```
+
+```{julia}
+#| code-fold: true
+
+x_vals = [0 0 0; x1[1] x2[1] x3[1]]
+y_vals = [0 0 0; x1[2] x2[2] x3[2]]
+
+plot(x_vals, y_vals, arrow = true, color = :blue,
+    legend = :none, xlims = (-3, 3), ylims = (-3, 3),
+    annotations = [((x1 .+ 0.2)..., "x1"),
+                ((x2 .+ 0.2)..., "x2 = A * x1"),
+                ((x3 .+ [-1, 0.2])..., "x3 = A * A * x1")],
+    xticks = -3:1:3, yticks = -3:1:3,
+    framestyle = :origin,
+    aspect_ratio = :equal)
+```
+
+- **Exercise**: Given two vectors $\mathbf{x}, \mathbf{y} \in \mathbb{R}^2$ of same length, how do we find a rotation matrix such that $\mathbf{A} \mathbf{x} = \mathbf{y}$?
+
+```{julia}
+x, y = randn(2), randn(2)
+x = x / norm(x)
+y = y / norm(y)
+cosθ = x'y / (norm(x) * norm(y))
+```
+
+```{julia}
+sinθ = sqrt(1 - cosθ^2)
+A = [cosθ -sinθ; sinθ cosθ]
+```
+
+```{julia}
+# note we have either Ax = y or Ay = x
+if A * y ≈ x
+    A = [cosθ sinθ; -sinθ cosθ]
+end
+```
+
+```{julia}
+A * x ≈ y
+```
+
+### Projection and reflection
+
+- **Projection** of $\mathbf{x} \in \mathbb{R}^n$ on the line through $\mathbf{0}_n$ and $\mathbf{a}$:
+$$
+\mathbf{y} = \frac{\mathbf{a}'\mathbf{x}}{\|\mathbf{a}\|^2} \mathbf{a} = \frac{\mathbf{a}\mathbf{a}'}{\|\mathbf{a}\|^2} \mathbf{x} = \mathbf{A} \mathbf{x},
+$$
+where
+$$
+\mathbf{A} = \frac{1}{\|\mathbf{a}\|^2} \mathbf{a} \mathbf{a}'.
+$$
+
+- **Reflection** of $\mathbf{x} \in \mathbb{R}^n$ with respect to the line through $\mathbf{0}_n$ and $\mathbf{a}$:
+$$
+\mathbf{z} = \mathbf{x} + 2(\mathbf{y} - \mathbf{x}) = 2 \mathbf{y} - \mathbf{x} = \left( \frac{2}{\|\mathbf{a}\|^2} \mathbf{a} \mathbf{a}' - \mathbf{I} \right) \mathbf{x} = \mathbf{B} \mathbf{x},
+$$
+with
+$$
+\mathbf{B} = 2 \mathbf{A} - \mathbf{I} = \frac{2}{\|\mathbf{a}\|^2} \mathbf{a} \mathbf{a}' - \mathbf{I}.
+$$
+
+```{julia}
+a = [3, 2]
+A = a * a' / norm(a)^2
+x = [1, 2]
+y = A * x
+B = 2A - I
+z = B * x;
+```
+
+```{julia}
+x_vals = [0 0 0; x[1] y[1] z[1]]
+y_vals = [0 0 0; x[2] y[2] z[2]]
+
+plt = plot(x_vals, y_vals, arrow = true, color = :blue,
+    legend = :none, xlims = (-4, 4), ylims = (-2, 4),
+    annotations = [((x .+ 0.2)..., "x"),
+                ((y .+ 0.2)..., "y"),
+                ((z .+ 0.2)..., "z")],
+    xticks = -3:1:3, yticks = -1:1:3,
+    framestyle = :origin,
+    aspect_ratio = :equal)
+plot!(plt, [0, a[1]], [0, a[2]], arrow = true,
+    annotations = [((a .+ 0.2)..., "a")])
+```
+
+### Incidence matrix
+
+- For a directed graph with $m$ nodes and $n$ arcs (directed edges), the **node-arc indicence matrix** $\mathbf{B} \in \{-1,0,1\}^{m \times n}$ has entries
+\begin{eqnarray*}
+    b_{ij} = \begin{cases}
+    -1 & \text{if edge $j$ starts at vertex $i$} \\
+    1 & \text{if edge $j$ ends at vertex $i$} \\
+    0 & \text{otherwise}
+    \end{cases}.
+\end{eqnarray*}
+
+```{julia}
+# a simple directed graph on GS p16
+g = SimpleDiGraph(4)
+add_edge!(g, 1, 2)
+add_edge!(g, 1, 3)
+add_edge!(g, 2, 3)
+add_edge!(g, 2, 4)
+add_edge!(g, 4, 3)
+gplot(g, nodelabel=["x1", "x2", "x3", "x4"], edgelabel=["b1", "b2", "b3", "b4", "b5"])
+```
+
+```{julia}
+# incidence matrix B
+B = convert(Matrix{Int64}, incidence_matrix(g))
+```
+
+- **Kirchhoff's current law**: Let $\mathbf{B} \in \mathbb{R}^{m \times n}$ be an incidence matrix and $\mathbf{x}=(x_1 \, \ldots \, x_n)'$ with $x_j$ the current through arc $j$,
+$$
+(\mathbf{B} \mathbf{x})_i = \sum_{\text{arc $j$ enters node $i$}} x_j - \sum_{\text{arc $j$ leaves node $i$}} x_j = \text{net current arriving at node $i$}.
+$$
+
+```{julia}
+# symbolic calculation
+@variables x1 x2 x3 x4 x5
+B * [x1, x2, x3, x4, x5]
+```
+
+- **Kirchhoff's voltage law**: Let $\mathbf{B} \in \mathbb{R}^{m \times n}$ be an incidence matrix and $\mathbf{y} = (y_1, \ldots, y_m)'$ with $y_i$ the potential at node $i$,
+$$
+(\mathbf{B}' \mathbf{y})_j = y_k - y_l \text{ if edge $j$ goes from node $l$ to node $k$ = negative of the voltage across arc $j$}.
+$$
+
+```{julia}
+@variables y1 y2 y3 y4
+B' * [y1, y2, y3, y4]
+```
+
+### Convolution and filtering
+
+- Convolution plays important roles in signal processing, image processing, and (convolutional) neural network.
+
+- The **convolution** of $\mathbf{a} \in \mathbb{R}^n$ and $\mathbf{b} \in \mathbb{R}^m$ is a vector $\mathbf{c} \in \mathbb{R}^{n+m-1}$ with entries
+$$
+c_k = \sum_{i+j=k+1} a_i b_j.
+$$
+Notation: $\mathbf{c} = \mathbf{a} * \mathbf{b}$. 
+
+- Example: $n=4$, $m=3$,
+$$
+\mathbf{a} = \begin{pmatrix} a_1 \\ a_1 \\ a_3 \\ a_4 \end{pmatrix}, \quad \mathbf{b} = \begin{pmatrix} b_1 \\ b_2 \\ b_3 \end{pmatrix}.
+$$
+Then $\mathbf{c} = \mathbf{a} * \mathbf{b} \in \mathbb{R}^6$ has entries
+\begin{eqnarray*}
+c_1 &=& a_1 b_1 \\
+c_2 &=& a_1 b_2 + a_2 b_1 \\
+c_3 &=& a_1 b_3 + a_2 b_2 + a_3 b_1 \\
+c_4 &=& a_2 b_3 + a_3 b_2 + a_4 b_1 \\
+c_5 &=& a_3 b_3 + a_4 b_2 \\
+c_6 &=& a_4 b_3
+\end{eqnarray*}
+
+- Polynomial interpretation: Let $\mathbf{a}$ and $\mathbf{b}$ be the coefficients in polynomials
+\begin{eqnarray*}
+p(x) &=& a_1 + a_2 x + \cdots + a_n x^{n-1} \\
+q(x) &=& b_1 + b_2 x + \cdots + b_m x^{m-1},
+\end{eqnarray*}
+then $\mathbf{c} = \mathbf{a} * \mathbf{b}$ gives the coefficients of the product polynomial
+$$
+p(x) q(x) = c_1 + c_2 x + \cdots + c_{n+m-1} x^{m+n-2}.
+$$
+
+```{julia}
+n, m = 4, 3
+@variables a[1:n] b[1:m]
+```
+
+```{julia}
+p = Polynomial(a)
+```
+
+```{julia}
+q = Polynomial(b)
+```
+
+```{julia}
+p * q
+```
+
+```{julia}
+coeffs(p * q)
+```
+
+```{julia}
+a = [1, 0, -1, 2]
+b = [2, 1, -1]
+c = DSP.conv(a, b)
+```
+
+- Probabilistic interpretation. In probability and statistics, convolution often appears when computing the distribution of the sum of two independent random variables. Let $X$ be a discrete random variable taking value $i \in \{0,1,\ldots,n-1\}$ with probability $a_{i+1}$ and $Y$ be another discrete random variable taking values $j \in \{0,1,\ldots,m-1\}$ with probability $b_{j+1}$. Assume $X$ is independent of $Y$, then the distribution of $Z = X+Y$ is 
+$$
+c_k = \mathbb{P}(Z = k - 1) = \sum_{i+j=k-1} \mathbb{P}(X = i) \mathbb{P}(Y = j) = \sum_{i+j=k-1} a_{i+1} b_{j+1} = \sum_{i'+j'=k+1} a_{i'} b_{j'}
+$$
+for $k = 1,\ldots,n+m-1$. In the probability setting, the polynomial is called the probability generating function of a discrete random variable.
+
+```{julia}
+n, m, p = 10, 3, 0.5
+# pmf of X ∼ Bin(n-1, p)
+a = [Distributions.pdf(Binomial(n-1, p), j) for j in 0:n-1]
+```
+
+```{julia}
+# pmf of Y ∼ Unif(0, m-1)
+b = [Distributions.pdf(DiscreteUniform(0, m - 1), j) for j in 0:m-1]
+```
+
+```{julia}
+# compute pmf of Z = X + Y by convolution: c = a * b
+c = DSP.conv(a, b)
+```
+
+```{julia}
+plta = bar(0:(n - 1), a, label="X∼Bin(9, 0.5)")
+pltb = bar(0:(m - 1), b, label="Y∼Unif(0, 2)")
+pltc = bar(0:(n + m - 1), c, label="Z=X+Y")
+
+plot(plta, pltb, pltc, layout=(1,3), size=(1000, 300), ylim=[0, 0.4])
+```
+
+- Propoerties of convolution
+
+    - symmetric: $\mathbf{a} * \mathbf{b} = \mathbf{b} * \mathbf{a}$. 
+    - associative: $(\mathbf{a} * \mathbf{b}) * \mathbf{c} = \mathbf{a} * \mathbf{b} * \mathbf{c} = \mathbf{a} * (\mathbf{b} * \mathbf{c})$. 
+    - If $\mathbf{a} * \mathbf{b} = \mathbf{0}$, then $\mathbf{a} = \mathbf{0}$ or $\mathbf{b} = \mathbf{0}$.
+    
+    These properties follow either from the polynomial interpretation or probabilistic interpretation.
+
+- $\mathbf{c} = \mathbf{a} * \mathbf{b}$ is a linear function of $\mathbf{b}$ if we fix $\mathbf{a}$. 
+
+- $\mathbf{c} = \mathbf{a} * \mathbf{b}$ is a linear function of $\mathbf{a}$ if we fix $\mathbf{b}$.
+
+- For $n=4$ and $m=3$, 
+
+```{julia}
+n, m = 4, 3
+@variables a[1:n] b[1:m]
+```
+
+```{julia}
+# Toeplitz matrix corresponding to the vector a
+Ta = diagm(6, 3,
+     0 => [a[1], a[1], a[1]],
+    -1 => [a[2], a[2], a[2]],
+    -2 => [a[3], a[3], a[3]],
+    -3 => [a[4], a[4], a[4]]
+)
+```
+
+```{julia}
+c = Ta * b
+```
+
+```{julia}
+# c = Ta * b
+Symbolics.scalarize(c)
+```
+
+```{julia}
+# Toeplitz matrix corresponding to the vector b
+Tb = diagm(6, 4,
+     0 => [b[1], b[1], b[1], b[1]],
+    -1 => [b[2], b[2], b[2], b[2]],
+    -2 => [b[3], b[3], b[3], b[3]]
+)
+```
+
+```{julia}
+# c = Tb * a
+Symbolics.scalarize(Tb * a)
+```
+
+- The convolution matrices $\mathbf{T}_a$ and $\mathbf{T}_b$ are examples of **Toeplitz matrices**.
+
+- When one vector is much longer than the other, for example, $m \ll n$, we can consider the longer vector $\mathbf{a} \in \mathbb{R}^n$ as **signal**, and apply the inner product of the **filter** (also called **kernel**) $(b_m, \cdots, b_1) \in \mathbb{R}^m$ along a sliding window of $\mathbf{a}$.
+
+- If we apply filter (or kernel) in original order to the sliding window of the signal, it is called **correlation** instead of **convolution**. For symmetric filter (or kernel), correlation is same as convolution.
+
+- (2D) Filtering is extensively used in image processing.
+
+```{julia}
+img = testimage("mandrill")
+```
+
+```{julia}
+# correlatin with Gaussian kernel
+imgg = imfilter(img, Kernel.gaussian(3))
+```
+
+```{julia}
+?Kernel.gaussian()
+```
+
+```{julia}
+# Gaussian kernel with σ = 3
+Kernel.gaussian(3)
+```
+
+```{julia}
+# convolution with Gaussian kernel is same as correlation, since Gaussian kernel is symmetric
+imgg = imfilter(img, reflect(Kernel.gaussian(3)))
+```
+
+```{julia}
+# Correlation with Laplace kernel
+imgl = imfilter(img, Kernel.Laplacian())
+```
+
+```{julia}
+# Laplacian kernel
+Kernel.Laplacian()
+```
+
+```{julia}
+?Kernel.Laplacian()
+```
+
+```{julia}
+convert(AbstractArray, Kernel.Laplacian())
+```
+
+## Affine functions
+
+- A function $f: \mathbb{R}^n \mapsto \mathbb{R}^m$ is **affine** if 
+$$
+f(\alpha \mathbf{x} + \beta \mathbf{y}) = \alpha f(\mathbf{x}) + \beta f(\mathbf{y}).
+$$
+for all vectors $\mathbf{x}, \mathbf{y} \in \mathbb{R}^n$ and scalars $\alpha, \beta$ with $\alpha + \beta = 1$.
+
+- Any linear function is affine. Why?
+
+- Definition of affine function implies that
+$$
+f(\alpha_1 \mathbf{x}_1 + \cdots + \alpha_p \mathbf{x}_p) = \alpha_1 f(\mathbf{x}_1) + \cdots + \alpha_p f(\mathbf{x}_p)
+$$
+for all vectors $\mathbf{x}_1, \ldots, \mathbf{x}_p$ and scalars $\alpha_1, \ldots, \alpha_p$ such that $\alpha_1 + \cdots + \alpha_p = 1$.
+
+- Any affine function $f: \mathbb{R}^n \mapsto \mathbb{R}^m$ is of the form $\mathbf{A} \mathbf{x} + \mathbf{b}$ for some matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$ and vector $\mathbf{b} \in \mathbb{R}^m$ and vice versa. 
+
+    1. For fixed $\mathbf{A} \in \mathbb{R}^{m \times n}$ and $\mathbf{b} \in \mathbb{R}^m$, define function $f: \mathbb{R}^n \mapsto \mathbb{R}^m$ by a matrix-vector product plus a constant:
+    $$
+    f(\mathbf{x}) = \mathbf{A} \mathbf{x} + \mathbf{b}.
+    $$
+    Then $f$ is an affine function: if $\alpha + \beta = 1$, then
+    $$
+    f(\alpha \mathbf{x} + \beta \mathbf{y}) = \mathbf{A}(\alpha \mathbf{x} + \beta \mathbf{y}) + \mathbf{b} = \alpha \mathbf{A} \mathbf{x} + \beta \mathbf{A} \mathbf{y} + \alpha \mathbf{b} + \beta \mathbf{b} = \alpha(\mathbf{A} \mathbf{x} + \mathbf{b}) + \beta (\mathbf{A} \mathbf{y} + \mathbf{b}) = \alpha f(\mathbf{x}) + \beta f(\mathbf{y}).
+    $$
+
+    2. Any affine function can be written as $f(\mathbf{x}) = \mathbf{A} \mathbf{x} + \mathbf{b}$ with
+    $$
+    \mathbf{A} = \begin{pmatrix}
+    f(\mathbf{e}_1) - f(\mathbf{0}) \quad f(\mathbf{e}_2) - f(\mathbf{0}) \quad \ldots \quad f(\mathbf{e}_n) - f(\mathbf{0})
+    \end{pmatrix}
+    $$
+    and $\mathbf{b} = f(\mathbf{0})$. Hint: Write $\mathbf{x} = x_1 \mathbf{e}_1 + \cdots + x_n \mathbf{e}_n + (1 - x_1 - \cdots - x_n) \mathbf{0}$. 
+
+## Affine approximation of a function (important)
+
+- The **first-order Taylor approximation of a differentiable function $f: \mathbb{R} \mapsto \mathbb{R}$ at a point $z \in \mathbb{R}$** is
+$$
+\widehat f(x) = f(z) + f'(z) (x - z),
+$$
+where $f'(z)$ is the **derivative** of $f$ at $z$.
+
+- Example: $f(x) = e^{2x} - x$. The derivative is $f'(x) = 2e^{2x} - 1$. Then the first-order Taylor approximation of $f$ at point $z$ is
+$$
+f(x) \approx e^{2z} - z + (2e^{2z} - 1) (x - z).
+$$
+
+```{julia}
+x = Vector(-1:0.1:1)
+f1(x) = exp(2x) - x
+# draw the function
+plt = plot(x, f1.(x), label = "f(x)")
+# draw the affine approximation at z=0
+z = 0.0
+@show ForwardDiff.derivative(f1, z) # let computer calculate derivative!
+f̂1 = f1(z) .+ ForwardDiff.derivative(f1, z) .* (x .- z)
+plot!(plt, x, f̂1, label = "f(0)+f'(0)*(x-0)", legend = :topleft)
+```
+
+- The **first-order Taylor approximation of a differentiable function $f: \mathbb{R}^n \mapsto \mathbb{R}$ at a point $\mathbf{z} \in \mathbb{R}^n$** is
+$$
+\widehat f(\mathbf{x}) = f(\mathbf{z}) + [\nabla f(\mathbf{z})]' (\mathbf{x} - \mathbf{z}),
+$$
+where 
+$$
+\nabla f(\mathbf{z}) = \begin{pmatrix}
+\frac{\partial f}{\partial x_1}(\mathbf{z}) \\ \vdots \\ \frac{\partial f}{\partial x_n}(\mathbf{z})
+\end{pmatrix}
+$$
+is the **gradient** of $f$ evaluated at point $\mathbf{z}$. 
+
+- An example with $n=2$: The gradient of 
+$$
+f(\mathbf{x}) = f(x_1, x_2) = e^{2x_1 + x_2} - x_1
+$$
+is
+$$
+\nabla f(\mathbf{x}) = \begin{pmatrix}
+2 e^{2x_1 + x_2} - 1\\
+e^{2x_1 + x_2}
+\end{pmatrix}.
+$$
+The first-order Taylor approximation of $f$ at a point $\mathbf{z}$ is
+$$
+f(\mathbf{x}) \approx e^{2z_1 + z_2} - z_1 + \begin{pmatrix}
+2 e^{2z_1 + z_2} - 1 \,\,
+e^{2z_1 + z_2}
+\end{pmatrix} \begin{pmatrix} x_1 - z_1 \\ x_2 - z_2 \end{pmatrix}.
+$$
+
+```{julia}
+# a non-linear function f
+f2(x) = exp(2x[1] + x[2]) - x[1]
+# define grid
+n = 20
+grid = range(-1, 1, length = n)
+# draw the first-order approximation at (0,0)
+z = [0.0, 0.0]
+@show ForwardDiff.gradient(f2, z) # let computer calculate gradient!
+f2_approx(x) = f2(z) + ForwardDiff.gradient(f2, z)' * (x - z)
+f̂2x = [f2_approx([grid[row], grid[col]]) for row in 1:n, col in 1:n]
+plt = wireframe(grid, grid, f̂2x, label="f")
+# draw the function 
+f2x = [f2([grid[row], grid[col]]) for row in 1:n, col in 1:n]
+wireframe!(plt, grid, grid, f2x, label="fhat")
+```
+
+- Affine approximation: The **first-order Taylor approximation of a differentiable function $f: \mathbb{R}^n \mapsto \mathbb{R}^m$ at a point $\mathbf{z} \in \mathbb{R}^n$** is
+$$
+\widehat f(\mathbf{x}) = f(\mathbf{z}) + [\operatorname{D} f(\mathbf{z})] (\mathbf{x} - \mathbf{z}),
+$$
+where $\operatorname{D} f(\mathbf{z}) \in \mathbb{R}^{m \times n}$ is the **derivative matrix** or **Jacobian matrix** or **differential** evaluated at $\mathbf{z}$
+$$
+\operatorname{D} f(\mathbf{z}) = \begin{pmatrix}
+\frac{\partial f_1}{\partial x_1} (\mathbf{z}) & \frac{\partial f_1}{\partial x_2} (\mathbf{z}) & \cdots & \frac{\partial f_1}{\partial x_n} (\mathbf{z}) \\
+\frac{\partial f_2}{\partial x_1} (\mathbf{z}) & \frac{\partial f_2}{\partial x_2} (\mathbf{z}) & \cdots & \frac{\partial f_2}{\partial x_n} (\mathbf{z}) \\
+\vdots & \vdots & & \vdots \\
+\frac{\partial f_m}{\partial x_1} (\mathbf{z}) & \frac{\partial f_m}{\partial x_2} (\mathbf{z}) & \cdots & \frac{\partial f_m}{\partial x_n} (\mathbf{z})
+\end{pmatrix} = \begin{pmatrix}
+\nabla f_1(\mathbf{z})' \\
+\nabla f_2(\mathbf{z})' \\
+\vdots \\
+\nabla f_m(\mathbf{z})'
+\end{pmatrix}.
+$$
+
+- An example with $n=m=2$:
+$$
+f(\mathbf{x}) = \begin{pmatrix} f_1(\mathbf{x}) \\ f_2(\mathbf{x}) \end{pmatrix} = \begin{pmatrix}
+e^{2x_1 + x_2} - x_1 \\
+x_1^2 - x_2
+\end{pmatrix}.
+$$
+Derivative matrix is
+$$
+\operatorname{D} f(\mathbf{x}) = \begin{pmatrix}
+2e^{2x_1 + x_2} - 1 & e^{2x_1 + x_2} \\
+2x_1 & -1
+\end{pmatrix}
+$$
+First-order approximation of $f$ around $\mathbf{z} = \mathbf{0}$ is
+$$
+f(\mathbf{x}) \approx \begin{pmatrix} 1 \\ 0 \end{pmatrix} + \begin{pmatrix}
+1 & 1 \\
+0 & -1
+\end{pmatrix} \begin{pmatrix} x_1 - 0 \\ x_2 - 0 \end{pmatrix}.
+$$
+
+```{julia}
+# a nonlinear function
+f3(x) = [exp(2x[1] + x[2]) - x[1], x[1]^2 - x[2]]
+z = [0, 0]
+ForwardDiff.jacobian(f3, [0, 0])
+```
+
+## Computational complexity (important)
+
+- Matrix-vector product: $\mathbf{y} = \mathbf{A} \mathbf{x}$ where $\mathbf{A} \in \mathbb{R}^{m \times n}$ and $\mathbf{x} \in \mathbb{R}^n$. $2mn$ flops.
+
+- Special cases: 
+    - $\mathbf{A} \in \mathbb{R}^{n \times n}$ is diagonal, $\mathbf{A} \mathbf{x}$ takes $n$ flops.
+    - $\mathbf{A} \in \mathbb{R}^{n \times n}$ is lower triangular, $\mathbf{A} \mathbf{x}$ takes $n^2$ flops.
+    - $\mathbf{A} \in \mathbb{R}^{m \times n}$ is sparse, between $\text{nnz}(\mathbf{A})$ and $2\text{nnz}(\mathbf{A})$ flops, much less than $\ll 2mn$.
+    
+- Matrix-matrix product: $\mathbf{C} = \mathbf{A} \mathbf{B}$ where $\mathbf{A} \in \mathbb{R}^{m \times n}$ and $\mathbf{B} \in \mathbb{R}^{n \times p}$. Naive algorithm $2mnp$ flops. [Strassen's algorithm](https://en.wikipedia.org/wiki/Strassen_algorithm) reduces multiplication of two square matrices to $O(n^{\log_2 7})$ flops. Recent breakthroughs by [AlphaTensor](https://www.nature.com/nature/volumes/610/issues/7930).
+
+<img src="./matrix_games_cover.png" width=300 align="center"/>
+
+```{julia}
+Random.seed!(216)
+n = 2000
+A = Diagonal(randn(n))
+```
+
+```{julia}
+Ads = convert(Matrix{Float64}, A)
+```
+
+```{julia}
+x = randn(n)
+```
+
+```{julia}
+# full matrix times vector
+@benchmark $Ads * $x
+```
+
+```{julia}
+# dense matrix times vector
+@benchmark $A * $x
+```
+
+```{julia}
+# benchmark
+Random.seed!(216)
+n = 2000
+A = LowerTriangular(randn(n, n))
+```
+
+```{julia}
+Ads = convert(Matrix{Float64}, A)
+```
+
+```{julia}
+x = randn(n)
+# full matrix times vector
+@benchmark $Ads * $x
+```
+
+```{julia}
+# lower triangular matrix times vector
+@benchmark $A * $x
+```
+
+- Matrix-matrix product: $\mathbf{C} = \mathbf{A} \mathbf{B}$, where $\mathbf{A} \in \mathbb{R}^{m \times n}$ and $\mathbf{B} \in \mathbb{R}^{n \times p}$. $2mnp$ flops.
+
+- Exercise: Evaluate $\mathbf{y} = \mathbf{A} \mathbf{B} \mathbf{x}$, where $\mathbf{A}, \mathbf{B} \in \mathbb{R}^{n \times n}$, in two ways
+    - $\mathbf{y} = (\mathbf{A} \mathbf{B}) \mathbf{x}$. $2n^3$ flops.
+    - $\mathbf{y} = \mathbf{A} (\mathbf{B} \mathbf{x})$. $4n^2$ flops.  
+Which method is faster? 
+
+```{julia}
+Random.seed!(216)
+n = 2000
+A = randn(n, n)
+B = randn(n, n)
+x = randn(n);
+```
+
+```{julia}
+@benchmark ($A * $B) * $x
+```
+
+```{julia}
+@benchmark $A * ($B * $x)
+```
+
+- Exercise: Evaluate $\mathbf{y} = (\mathbf{I} + \mathbf{u} \mathbf{v}') \mathbf{x}$, where $\mathbf{u}, \mathbf{v}, \mathbf{x} \in \mathbb{R}^n$, in two ways.
+    - Evaluate $\mathbf{A} = \mathbf{I} + \mathbf{u} \mathbf{v}'$, then $\mathbf{y} = \mathbf{A} \mathbf{x}$. $3n^2$ flops.  
+    - Evaluate $\mathbf{y} = \mathbf{x} + (\mathbf{v}'\mathbf{x}) \mathbf{u}$. $4n$ flops.  
+    Which method is faster?
+
+```{julia}
+Random.seed!(216)
+n = 2000
+u = randn(n)
+v = randn(n)
+x = randn(n);
+```
+
+```{julia}
+# method 1
+@benchmark (I + $u * $v') * $x
+```
+
+```{julia}
+# method 2
+@benchmark $x + dot($v, $x) * $u
+```
+
+## Matrix with orthonormal columns, orthogonal matrix, QR factorization
+
+- A set of vectors $\mathbf{a}_1, \ldots, \mathbf{a}_k \in \mathbb{R}^{n}$ are orthonormal if the matrix $\mathbf{A} = (\mathbf{a}_1 \, \ldots \, \mathbf{a}_k) \in \mathbb{R}^{n \times k}$ satisfies
+$$
+\mathbf{A}' \mathbf{A} = \mathbf{I}_k.
+$$
+In this case, we say $\mathbf{A}$ has orthonormal columns, or $\mathbf{A}$ lives in the Stiefel manifold.
+
+- When $k = n$, a square matrix $\mathbf{A}$ with $\mathbf{A}'\mathbf{A} = \mathbf{I}_n$ is called an **orthogonal matrix**. Example: $\mathbf{I}_n$, permutation matrix, rotation matrix, ...
+
+```{julia}
+# a 3x3 orthogonal matrix
+a1 = [0, 0, 1]
+a2 = (1 / sqrt(2)) * [1, 1, 0]
+a3 = (1 / sqrt(2)) * [1, -1, 0]
+# a 3x3 orthogonal matrix
+A = [a1 a2 a3]
+```
+
+```{julia}
+A'A
+```
+
+### Properties of matrices with orthonormal columns.
+
+Assume $\mathbf{A} \in \mathbb{R}^{m \times n}$ has orthonormal columns. The corresponding linear mapping is $f:\mathbb{R}^n \mapsto \mathbb{R}^m$ defined by $f(\mathbf{x}) = \mathbf{A} \mathbf{x}$.
+
+1. $f$ is *norm preserving*: $\|\mathbf{A} \mathbf{x}\| = \|\mathbf{x}\|$.
+
+    Proof: $\|\mathbf{A} \mathbf{x}\|^2 = \mathbf{x}' \mathbf{A}' \mathbf{A} \mathbf{x} = \mathbf{x}' \mathbf{x} = \|\mathbf{x}\|_2^2$.
+
+2. $f$ preserves the inner product between vectors: $(\mathbf{A} \mathbf{x})'(\mathbf{A} \mathbf{y}) = \mathbf{x}'\mathbf{y}$.
+
+    Proof: $(\mathbf{A} \mathbf{x})'(\mathbf{A} \mathbf{y}) = \mathbf{x}' \mathbf{A}' \mathbf{A} \mathbf{y} = \mathbf{x}'\mathbf{y}$.
+    
+3. $f$ preserves the angle between vectors: $\angle (\mathbf{A} \mathbf{x}, \mathbf{A} \mathbf{y}) = \angle (\mathbf{x}, \mathbf{y})$.
+
+    Proof:
+$$
+\angle (\mathbf{A} \mathbf{x}, \mathbf{A} \mathbf{y}) = \arccos \frac{(\mathbf{A} \mathbf{x})'(\mathbf{A} \mathbf{y})}{\|\mathbf{A} \mathbf{x}\|\|\mathbf{A} \mathbf{y}\|} = \arccos \frac{\mathbf{x}'\mathbf{y}}{\|\mathbf{x}\|\|\mathbf{y}\|}.
+$$
+
+```{julia}
+x = [1, 2]
+y = [3, 2]
+
+θ = π / 4
+A = [cos(θ) -sin(θ); sin(θ) cos(θ)]
+
+Ax = A * x
+Ay = A * y
+
+x_vals = [0 0 0 0; x[1] y[1] Ax[1] Ay[1]]
+y_vals = [0 0 0 0; x[2] y[2] Ax[2] Ay[2]]
+
+plt = plot(x_vals, y_vals, arrow = true, color = :blue,
+    legend = :none, xlims = (-4, 4), ylims = (-2, 4),
+    annotations = [((x .+ 0.2)..., "x"),
+                ((y .+ 0.2)..., "y"),
+                ((Ax .+ 0.2)..., "Ax"),
+                ((Ay .+ 0.2)..., "Ay")],
+    xticks = -3:1:3, yticks = -1:1:3,
+    framestyle = :origin,
+    aspect_ratio = :equal)
+```
+
+### QR factorization
+
+- Recall in the [Gram-Schmidt algorithm](https://ucla-biostat-216.github.io/2023fall/slides/02-vector/02-vector.html#how-to-orthonormalize-a-set-of-vectors-gram-schmidt-algorithm), given input vectors $\mathbf{a}_1, \ldots, \mathbf{a}_k \in \mathbb{R}^n$, the Gram-Schmidt algorithm outputs orthonormal vectors $\mathbf{q}_1, \ldots, \mathbf{q}_k$.
+
+    This can be compactly expressed as
+$$
+\mathbf{A} = \mathbf{Q} \mathbf{R},
+$$
+where $\mathbf{A} = (\mathbf{a}_1 \, \cdots \, \mathbf{a}_k) \in \mathbb{R}^{n \times k}$, $\mathbf{Q} = (\mathbf{q}_1 \, \cdots \, \mathbf{q}_k) \in \mathbb{R}^{n \times k}$ satisfying $\mathbf{Q}'\mathbf{Q} = \mathbf{I}_k$ ($\mathbf{Q}$ has orthonormal columns), and $\mathbf{R} \in \mathbb{R}^{k \times k}$ is an upper triangular matrix with positive diagonal elements.
+
+- What are the entries in $\mathbf{R}$? In the $i$-th iteration of the Gram-Schmidt algorithm
+\begin{eqnarray*}
+\text{Orthogonalization step: } & & \tilde{\mathbf{q}}_i = \mathbf{a}_i - (\mathbf{q}_1' \mathbf{a}_i) \mathbf{q}_1 - \cdots - (\mathbf{q}_{i-1}' \mathbf{a}_i) \mathbf{q}_{i-1} \\
+\text{Normalization step: } & & \mathbf{q}_i = \tilde{\mathbf{q}}_i / \|\tilde{\mathbf{q}}_i\|.
+\end{eqnarray*}
+Therefore, 
+$$
+\mathbf{a}_i =  (\mathbf{q}_1' \mathbf{a}_i) \mathbf{q}_1 + \cdots + (\mathbf{q}_{i-1}' \mathbf{a}_i) \mathbf{q}_{i-1} + \|\tilde{\mathbf{q}}_i\| \mathbf{q}_i.
+$$
+This tells us $R_{ij} = \mathbf{q}_i' \mathbf{a}_j$ for $i < j$ and $R_{ii} = \|\tilde{\mathbf{q}}_i\|$.
+
+- Thus overall Gram-Schmidt algorithm performs
+$$
+\mathbf{A} = \begin{pmatrix} | & | & & | & | \\ \mathbf{a}_1 & \mathbf{a}_2 & \cdots & \mathbf{a}_{k-1} & \mathbf{a}_k \\ | & | & & | & | \end{pmatrix} = \begin{pmatrix} | & | & & | & | \\ \mathbf{q}_1 & \mathbf{q}_2 & \cdots & \mathbf{q}_{k-1} & \mathbf{q}_k \\ | & | & & | & | \end{pmatrix} \begin{pmatrix} 
+\|\tilde{\mathbf{q}}_1\| & \mathbf{q}_1'\mathbf{a}_2 & \cdots & \mathbf{q}_1' \mathbf{a}_{k-1}  & \mathbf{q}_1' \mathbf{a}_k \\
+& \|\tilde{\mathbf{q}}_2\| & \cdots & \mathbf{q}_2' \mathbf{a}_{k-1} & \mathbf{q}_2' \mathbf{a}_k \\
+& & \ddots & \vdots & \vdots \\
+& & & \|\tilde{\mathbf{q}}_{k-1}\| & \mathbf{q}_{k-1}' \mathbf{a}_k \\
+& & & & \|\tilde{\mathbf{q}}_k\|
+\end{pmatrix} = \mathbf{Q} \mathbf{R}.
+$$
+
+```{julia}
+# HW2: BV 5.6
+n = 5
+A = [i ≤ j ? 1 : 0 for i in 1:n, j in 1:n]
+```
+
+```{julia}
+# in computer, QR decomposition is performed by some algorithm other than Gram-Schmidt
+qr(A)
+```
