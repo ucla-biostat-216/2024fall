@@ -1,0 +1,54 @@
+---
+title: Biostat 216 Homework 2
+subtitle: 'Due Oct 11 @ 11:59pm'
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    number-sections: true
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+jupyter:
+  jupytext:
+    formats: 'ipynb,qmd'
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.15.2
+  kernelspec:
+    display_name: Julia 1.10.5
+    language: julia
+    name: julia-1.10
+---
+
+Submit a PDF (scanned/photographed from handwritten solutions, or converted from RMarkdown or Jupyter Notebook or Quarto) to Gradescope in BruinLearn.
+
+## Q1. Sub-multiplicity of Frobenius norm
+
+Show the matrix norm property 
+$$
+\|\mathbf{A} \mathbf{B}\|_{\text{F}} \le \|\mathbf{A}\|_{\text{F}} \|\mathbf{B}\|_{\text{F}}
+$$ 
+for the Frobenius norm. Hint: Cauchy-Schwartz inequality.
+
+BV exercise 6.14 is a special case of this result.
+
+## Q2. Induced matrix norm
+
+For any vector norm $\|\mathbf{x}\|$ on $\mathbb{R}^m$ and $\mathbb{R}^n$, there is an induced matrix norm $\|\mathbf{A}\|$ on $m \times n$ matrices defined by
+$$
+\|\mathbf{A}\| = \sup_{\mathbf{x} \ne \mathbf{0}} \frac{\|\mathbf{A} \mathbf{x}\|}{\|\mathbf{x}\|} = \sup_{\|\mathbf{x}\|=1} \|\mathbf{A} \mathbf{x}\|.
+$$
+
+1. Show the second equality in the above equation.
+
+2. Show the four properties (positive definiteness, homogeneity, triangle inequality, sub-multiplicity) for the induced matrix norm.
+
+3. Show that the Frobenius norm is different from the induced matrix-2 norm.
+
+## BV exercises
+
+5.1, 5.2, 5.4, 5.6, 5.8, 5.9, 6.3, 6.11, 6.17, 6.21, 6.22
