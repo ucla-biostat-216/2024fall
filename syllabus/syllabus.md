@@ -80,7 +80,7 @@ In-class midterm on TBD. In-class final exam is Monday Dec 9, 3pm-6pm in CHS 61-
 
 ### Final Grade
 
-Attendance (20%) + Homework (20%) + midterm (20%) + final exam (40%).
+Attendance and participation (Slack, Hypothes.is, OH, optional problems) (20%) + Homework (20%) + midterm (20%) + final exam (40%).
 
 ### Ask For Help
 
