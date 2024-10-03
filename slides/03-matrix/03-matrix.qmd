@@ -175,9 +175,9 @@ $$
 0 & \cdots & 1
 \end{pmatrix}.
 $$
-The subscript is often omitted when the dimension is clear from context. The columns of $\mathbf{A}$ are the unit vectors
+The subscript is often omitted when the dimension is clear from context. The columns and row of $\mathbf{A}$ are the unit vectors
 $$
-\mathbf{I}_n = \begin{pmatrix} \mathbf{e}_1 \, \mathbf{e}_2 \, \cdots \, \mathbf{e}_n \end{pmatrix}.
+\mathbf{I}_n = \begin{pmatrix} \mathbf{e}_1 \, \mathbf{e}_2 \, \cdots \, \mathbf{e}_n \end{pmatrix} = \begin{pmatrix} - & \mathbf{e}_1' & - \\ & \vdots & \\ - & \mathbf{e}_n' & - \end{pmatrix}.
 $$
 Identity matrix is called the **uniform scaling** in some computer languages.
 
