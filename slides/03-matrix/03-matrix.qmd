@@ -54,8 +54,10 @@ a_{11} & \cdots & a_{1n} \\
 \vdots & \ddots & \vdots \\
 a_{m1} & \cdots & a_{mn}
 \end{pmatrix}.
-$$
-    - $a_{ij}$ are the matrix **elements** or **entries** or **coefficients** or **components**.  
+$$  
+
+    - $a_{ij}$ are the matrix **elements** or **entries** or **coefficients** or **components**.
+      
     - **Size** or **dimension** of the matrix is $m \times n$.  
 
 - Many authors use square brackets:
@@ -543,7 +545,7 @@ a_{i1} & \cdots & a_{in} \\
 & &
 \end{pmatrix} \begin{pmatrix}
 & b_{1j} & \\
-& \vdots & \\
+\quad & \vdots & \quad \\
 & b_{nj} &
 \end{pmatrix}.
 $$
@@ -657,7 +659,7 @@ The adjacency matrix $\mathbf{A}$ has entries
     0 & \text{otherwise}
     \end{cases}.
 \end{eqnarray*}
-Note this definition differs from the BV book (p112).
+Note this definition differs from the BV book (p112), which defines $a_{ij}=1$ when there is an edge from node $j$ to node $i$.
 
 ```{julia}
 # adjacency matrix A
