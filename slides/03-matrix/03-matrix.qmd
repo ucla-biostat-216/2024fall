@@ -518,7 +518,7 @@ $$
 $$
 is the $m \times p$ matrix with entries
 $$
-c_{ij} = a_{i1} b_{1j} + a_{i2} b_{2k} + \cdots + a_{in} b_{nj} = \sum_{k=1}^n a_{ik} b_{kj}.
+c_{ij} = a_{i1} b_{1j} + a_{i2} b_{2j} + \cdots + a_{in} b_{nj} = \sum_{k=1}^n a_{ik} b_{kj}.
 $$
 Note the number of columns in $\mathbf{A}$ must be equal to the number of rows in $\mathbf{B}$.
 
@@ -574,9 +574,9 @@ C[2, 2] ≈ A[2, :]'B[:, 2]
 
     - (Inner product view) For $\mathbf{A} \in \mathbb{R}^{m \times n}$ and $\mathbf{b} \in \mathbb{R}^{n}$,
 $$
-\mathbf{A} \mathbf{b} = \begin{pmatrix} - & \mathbf{c}_1' & - \\
-& \vdots & \\ - & \mathbf{c}_m' & - 
-\end{pmatrix} \begin{pmatrix} | \\ \mathbf{b} \\ | \end{pmatrix} = \begin{pmatrix} \mathbf{c}_1' \mathbf{b} \\ \vdots \\ \mathbf{c}_m' \mathbf{b} \end{pmatrix} \in \mathbb{R}^m.
+\mathbf{A} \mathbf{b} = \begin{pmatrix} - & \mathbf{a}_1' & - \\
+& \vdots & \\ - & \mathbf{a}_m' & - 
+\end{pmatrix} \begin{pmatrix} | \\ \mathbf{b} \\ | \end{pmatrix} = \begin{pmatrix} \mathbf{a}_1' \mathbf{b} \\ \vdots \\ \mathbf{a}_m' \mathbf{b} \end{pmatrix} \in \mathbb{R}^m.
 $$
 (Linear combination view) Alternatively, $\mathbf{A} \mathbf{b}$ can be viewed as a linear combination of columns of $\mathbf{A}$
 $$
@@ -1030,7 +1030,7 @@ plot!(plt, [0, a[1]], [0, a[2]], arrow = true,
     annotations = [((a .+ 0.2)..., "a")])
 ```
 
-### Incidence matrix
+### Incidence matrix (optional)
 
 - For a directed graph with $m$ nodes and $n$ arcs (directed edges), the **node-arc indicence matrix** $\mathbf{B} \in \{-1,0,1\}^{m \times n}$ has entries
 \begin{eqnarray*}
@@ -1175,7 +1175,7 @@ plot(plta, pltb, pltc, layout=(1,3), size=(1000, 300), ylim=[0, 0.4])
     - associative: $(\mathbf{a} * \mathbf{b}) * \mathbf{c} = \mathbf{a} * \mathbf{b} * \mathbf{c} = \mathbf{a} * (\mathbf{b} * \mathbf{c})$. 
     - If $\mathbf{a} * \mathbf{b} = \mathbf{0}$, then $\mathbf{a} = \mathbf{0}$ or $\mathbf{b} = \mathbf{0}$.
     
-    These properties follow either from the polynomial interpretation or probabilistic interpretation.
+    These properties follow either from the polynomial interpretation or the probabilistic interpretation.
 
 - $\mathbf{c} = \mathbf{a} * \mathbf{b}$ is a linear function of $\mathbf{b}$ if we fix $\mathbf{a}$. 
 
@@ -1618,7 +1618,7 @@ $$
 $$
 This tells us $R_{ij} = \mathbf{q}_i' \mathbf{a}_j$ for $i < j$ and $R_{ii} = \|\tilde{\mathbf{q}}_i\|$.
 
-- Thus overall Gram-Schmidt algorithm performs
+- Thus overall Gram-Schmidt algorithm produces
 $$
 \mathbf{A} = \begin{pmatrix} | & | & & | & | \\ \mathbf{a}_1 & \mathbf{a}_2 & \cdots & \mathbf{a}_{k-1} & \mathbf{a}_k \\ | & | & & | & | \end{pmatrix} = \begin{pmatrix} | & | & & | & | \\ \mathbf{q}_1 & \mathbf{q}_2 & \cdots & \mathbf{q}_{k-1} & \mathbf{q}_k \\ | & | & & | & | \end{pmatrix} \begin{pmatrix} 
 \|\tilde{\mathbf{q}}_1\| & \mathbf{q}_1'\mathbf{a}_2 & \cdots & \mathbf{q}_1' \mathbf{a}_{k-1}  & \mathbf{q}_1' \mathbf{a}_k \\
