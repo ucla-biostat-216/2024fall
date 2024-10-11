@@ -1,0 +1,43 @@
+---
+title: Biostat 216 Homework 3
+subtitle: 'Due Oct 18 @ 11:59pm'
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    number-sections: true
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+jupyter:
+  jupytext:
+    formats: 'ipynb,qmd'
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.15.2
+  kernelspec:
+    display_name: Julia 1.10.5
+    language: julia
+    name: julia-1.10
+---
+
+Submit a PDF (scanned/photographed from handwritten solutions, or converted from RMarkdown or Jupyter Notebook or Quarto) to Gradescope in BruinLearn. 
+
+## Q1. Computational complexity of matrix multiplication
+
+Let $\mathbf{A} \in \mathbb{R}^{m \times n}$, $\mathbf{B} \in \mathbb{R}^{n \times p}$. Consider four ways of computing the matrix product $\mathbf{C} = \mathbf{A} \mathbf{B}$. Calculate the flop count (leading term) in each of these four algorithms.
+
+1. (Inner products) Evaluate entries $c_{ij} = \mathbf{a}_i' \mathbf{b}_j$ for all $i, j$.
+
+2. (Matrix vector products) Evaluate columns $\mathbf{c}_j = \mathbf{A} \mathbf{b}_j$ for all $j$.
+
+3. (Vector matrix products) Evaluate rows $\mathbf{c}_i' = \mathbf{a}_i' \mathbf{B}$ for all $i$.
+
+4. (Vector outer products) Evaluate $\mathbf{C}$ as the sum of outer prodcuts $\mathbf{a}_1 \mathbf{b}_1' + \cdots + \mathbf{a}_n \mathbf{b}_n'$.
+
+## BV exercises
+
+7.12, 7.13, 7.14, 8.4, 8.5, 8.6, 8.9, 10.9 (also describe $\mathbf{C}=\mathbf{A} \mathbf{D}$), 10.11, 10.19, 10.23, 10.36, 10.42, 10.43, 10.44
