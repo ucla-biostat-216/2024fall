@@ -1090,7 +1090,7 @@ Notation: $\mathbf{c} = \mathbf{a} * \mathbf{b}$.
 
 - Example: $n=4$, $m=3$,
 $$
-\mathbf{a} = \begin{pmatrix} a_1 \\ a_1 \\ a_3 \\ a_4 \end{pmatrix}, \quad \mathbf{b} = \begin{pmatrix} b_1 \\ b_2 \\ b_3 \end{pmatrix}.
+\mathbf{a} = \begin{pmatrix} a_1 \\ a_2 \\ a_3 \\ a_4 \end{pmatrix}, \quad \mathbf{b} = \begin{pmatrix} b_1 \\ b_2 \\ b_3 \end{pmatrix}.
 $$
 Then $\mathbf{c} = \mathbf{a} * \mathbf{b} \in \mathbb{R}^6$ has entries
 \begin{eqnarray*}
@@ -1185,7 +1185,14 @@ plot(plta, pltb, pltc, layout=(1,3), size=(1000, 300), ylim=[0, 0.4])
 
 ```{julia}
 n, m = 4, 3
-@variables a[1:n] b[1:m]
+
+# symbolic vector
+a = Symbolics.variables(:a, 1:n)
+```
+
+```{julia}
+# symbolic vector
+b = Symbolics.variables(:b, 1:m)
 ```
 
 ```{julia}
@@ -1637,5 +1644,13 @@ A = [i ≤ j ? 1 : 0 for i in 1:n, j in 1:n]
 
 ```{julia}
 # in computer, QR decomposition is performed by some algorithm other than Gram-Schmidt
-qr(A)
+qra = qr(A)
+```
+
+```{julia}
+qra.Q |> Matrix
+```
+
+```{julia}
+qra.R
 ```
