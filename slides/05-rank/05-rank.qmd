@@ -12,6 +12,10 @@ format:
     toc-depth: 4
     toc-location: left
     code-fold: false
+    link-external-icon: true
+    link-external-newwindow: true
+comments:
+  hypothesis: true
 jupyter:
   jupytext:
     formats: 'ipynb,qmd'
