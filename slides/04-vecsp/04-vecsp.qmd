@@ -182,7 +182,7 @@ Sometimes it is also called the **image** or **range** or **manifold** of $\math
     \mathcal{N}(\mathbf{A}') = \{\mathbf{x} \in \mathbb{R}^m: \mathbf{A}' \mathbf{x} = \mathbf{0}\}.
 \end{eqnarray*}
 
-TODO in class: show these 4 sets are vector spaces.
+    Proof: HW4.
 
 * Example: Draw the four subspaces of matrix $\mathbf{A} = \begin{pmatrix} 1 & -2 & -2 \\ 3 & -6 & -6 \end{pmatrix}$. TODO in class.
 
