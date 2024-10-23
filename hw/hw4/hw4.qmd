@@ -1,0 +1,117 @@
+---
+title: Biostat 216 Homework 4
+subtitle: 'Due Oct 30 @ 11:59pm'
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    number-sections: false
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+jupyter:
+  jupytext:
+    formats: 'ipynb,qmd'
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.15.2
+  kernelspec:
+    display_name: Julia 1.10.5
+    language: julia
+    name: julia-1.10
+---
+
+Submit a PDF (scanned/photographed from handwritten solutions, or converted from RMarkdown or Jupyter Notebook or Quarto) to Gradescope in BruinLearn.
+
+## Q1. 
+
+Show the following claims.
+
+1. If $\mathcal{S}_1$ and $\mathcal{S}_2$ are two vector spaces of same order, then their **intersection** $\mathcal{S}_1 \cap \mathcal{S}_2$ is a vector space.
+    
+2. If $\mathcal{S}_1$ and $\mathcal{S}_2$ are two vector spaces of same order, then their **union** $\mathcal{S}_1 \cup \mathcal{S}_2$ is not necessarily a vector space.
+
+3. The **span** of a set of $\mathbf{x}_1,\ldots,\mathbf{x}_k \in \mathbb{R}^n$, defined as the set of all possible linear combinations of $\mathbf{x}_i$s
+$$
+    \text{span} \{\mathbf{x}_1,\ldots,\mathbf{x}_k\} = \left\{\sum_{i=1}^k \alpha_i \mathbf{x}_i: \alpha_i \in \mathbb{R} \right\},
+$$
+is a vector space in $\mathbb{R}^n$.
+
+4. The null space of an matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$ is a vector space.
+
+## Q2.
+
+Let
+$$
+\mathbf{A}_1 = \begin{pmatrix}
+1 & 3 & -2 \\
+3 & 9 & -6 \\
+2 & 6 & -4
+\end{pmatrix}, \quad \mathbf{A}_2 = \begin{pmatrix}
+1 & 2 & 3 \\
+4 & 5 & 6 \\
+7 & 8 & 9
+\end{pmatrix}.
+$$  
+
+1. Find the matrices $\mathbf{C}_1$ and $\mathbf{C}_2$ containing independent columns of $\mathbf{A}_1$ and $\mathbf{A}_2$.  
+    
+2. Find a rank factorization $\mathbf{A} = \mathbf{C} \mathbf{R}$ of each of $\mathbf{A}_1$ and $\mathbf{A}_2$.  
+    
+3. Produce a basis for the column spaces of $\mathbf{A}_1$ and $\mathbf{A}_2$. What are the dimensions of those column spaces (the number of independent vectors)? What are the ranks of $\mathbf{A}_1$ and $\mathbf{A}_2$? How many independent rows in $\mathbf{A}_1$ and $\mathbf{A}_2$?
+
+## Q3.
+
+1. Show that an **orthocomplement set** of a set $\mathcal{X}$ (not necessarily a subspace) in a vector space $\mathcal{V} \subseteq \mathbb{R}^m$
+$$
+    \mathcal{X}^\perp = \{ \mathbf{u} \in \mathcal{V}: \langle \mathbf{x}, \mathbf{u} \rangle = 0 \text{ for all } \mathbf{x} \in \mathcal{X}\}
+$$
+is a vector space.
+
+2. Show that, if $\mathcal{S}$ is a subspace of a vector space $\mathcal{V} \subseteq \mathbb{R}^m$, then $\mathcal{S} = (\mathcal{S}^\perp)^\perp$.
+
+## Q4.
+
+In this exercise, we show the fact 
+$$
+\text{rank}(\mathbf{A} + \mathbf{B}) \le \text{rank}(\mathbf{A}) + \text{rank}(\mathbf{B})
+$$ 
+for any two matrices $\mathbf{A}$ and $\mathbf{B}$ of same size in steps.
+
+1. Show that the sum of two vector spaces $\mathcal{S}_1$ and $\mathcal{S}_2$ of same order
+$$
+\mathcal{S}_1 + \mathcal{S}_2 = \{\mathbf{x}_1 + \mathbf{x}_2: \mathbf{x}_1 \in \mathcal{S}_1, \mathbf{x}_2 \in \mathcal{S}_2\}
+$$
+is a vector space.  
+
+2. Show that $\text{dim}(\mathcal{S}_1 + \mathcal{S}_2) \le \text{dim}(\mathcal{S}_1) + \text{dim}(\mathcal{S}_2)$.
+    
+3. Show that $\mathcal{C}(\mathbf{A} + \mathbf{B}) \subseteq \mathcal{C}(\mathbf{A}) + \mathcal{C}(\mathbf{B})$. 
+    
+4. Conclude that $\text{rank}(\mathbf{A} + \mathbf{B}) \le \text{rank}(\mathbf{A}) + \text{rank}(\mathbf{B})$. 
+
+## Q5. Fundamental theorem of ranks
+
+1. Show that $\text{rank}(\mathbf{A}) = \text{rank}(\mathbf{A}'\mathbf{A})$ and $\text{rank}(\mathbf{A}') = \text{rank}(\mathbf{A}\mathbf{A}')$. Hint: we did it in class, using rank-nullity theorem.
+
+2. Show that $\text{rank}(\mathbf{A}) = \text{rank}(\mathbf{A}')$ using part 1. Hint: we showed this remarkable result using rank factorization in class. This question asks you to show it using part 1.
+
+## Q6.
+
+1. If $\mathbf{A}$ and $\mathbf{B}$ are two matrices with the same number of rows, then
+$$
+\mathcal{C}(\begin{pmatrix} \mathbf{A} \,\,\, \mathbf{B} \end{pmatrix}) = \mathcal{C}(\mathbf{A}) + \mathcal{C}(\mathbf{B}).
+$$
+
+2. If $\mathbf{A}$ and $\mathbf{C}$ are two matrices with the same number of columns, then
+$$
+\mathcal{R} \left( \begin{pmatrix} \mathbf{A} \\ \mathbf{C} \end{pmatrix} \right) = \mathcal{R}( \mathbf{A} ) + \mathcal{R}( \mathbf{C} )
+$$
+and
+$$
+\mathcal{N} \left( \begin{pmatrix} \mathbf{A} \\ \mathbf{C} \end{pmatrix} \right) = \mathcal{N}( \mathbf{A} ) \cap \mathcal{N}( \mathbf{C} ).
+$$
+

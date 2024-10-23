@@ -28,3 +28,5 @@ books/
 
 .DS_Store
 .ipynb_checkpoints
+hw?sol.*
+hw/midterm
