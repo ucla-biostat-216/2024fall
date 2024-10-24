@@ -1,0 +1,480 @@
+---
+title: Linear equations and matrix inverses (BV Chapter 11)
+subtitle: Biostat 216
+author: Dr. Hua Zhou @ UCLA
+date: today
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    number-sections: true
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+    link-external-icon: true
+    link-external-newwindow: true
+comments:
+  hypothesis: true
+jupyter:
+  jupytext:
+    formats: 'ipynb,qmd'
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.15.2
+  kernelspec:
+    display_name: Julia 1.10.5
+    language: julia
+    name: julia-1.10
+---
+
+```{julia}
+using Pkg
+Pkg.activate(pwd())
+Pkg.instantiate()
+Pkg.status()
+```
+
+```{julia}
+using LinearAlgebra
+```
+
+## Generalized inverse and Moore-Penrose inverse
+
+- Let $\mathbf{A} \in \mathbb{R}^{m \times n}$. A matrix $\mathbf{G} \in \mathbb{R}^{n \times m}$ is called the **Moore-Penrose inverse** or **MP inverse** of $\mathbf{A}$ if it satisifes following four conditions:   
+    (1) $\mathbf{A} \mathbf{G} \mathbf{A} = \mathbf{A}$. $\quad \quad$ (_generalized inverse_, $g_1$ inverse, or _inner pseudo-inverse_).   
+    (2) $\mathbf{G} \mathbf{A} \mathbf{G} = \mathbf{G}$. $\quad \quad$ (_outer pseudo-inverse_).    
+    (3) $(\mathbf{A} \mathbf{G})' = \mathbf{A} \mathbf{G}$.  
+    (4) $(\mathbf{G} \mathbf{A})' = \mathbf{G} \mathbf{A}$.  
+    We shall denote the **Moore-Penrose inverse** of $\mathbf{A}$ by $\mathbf{A}^+$.
+
+- Any matrix $\mathbf{G} \in \mathbb{R}^{n \times m}$ that satisfies (1) is called a **generalized inverse**, or **$g_1$ inverse**, or **inner pseudo-inverse**. Denoted by $\mathbf{A}^-$ or $\mathbf{A}^g$.  
+
+    Generalized inverse is not unique in general.
+
+- Definition (1) for generalized inverses is motivated by the following result.
+
+    If $\mathbf{A} \mathbf{x} = \mathbf{b}$ has solution(s), then $\mathbf{A}^- \mathbf{b}$ is a solution for any generalized inverse $\mathbf{A}^-$. 
+
+    Proof: $\mathbf{A} (\mathbf{A}^- \mathbf{b}) = \mathbf{A} (\mathbf{A}^- \mathbf{A} \mathbf{x}) = (\mathbf{A} \mathbf{A}^- \mathbf{A}) \mathbf{x} = \mathbf{A} \mathbf{x} = \mathbf{b}$. 
+
+- Any matrix $\mathbf{G} \in \mathbb{R}^{n \times m}$ that satisfies (1)+(2) is called a **reflective generalized inverse**, or **$g_2$ inverse**, or **outer pseudo-inverse**. Denoted by $\mathbf{A}^*$.
+
+- The **Moore-Penrose inverse** of any matrix $\mathbf{A}$ exists and is unique. 
+
+    Proof of uniqueness (optional): Let $\mathbf{G}_1, \mathbf{G}_2 \in \mathbb{R}^{n \times m}$ be two matrices satisfying properties (1)-(4). Then  
+$$
+    \mathbf{A} \mathbf{G}_1 = (\mathbf{A} \mathbf{G}_1)' = \mathbf{G}_1' \mathbf{A}' = \mathbf{G}_1' (\mathbf{A} \mathbf{G}_2 \mathbf{A})' = \mathbf{G}_1' \mathbf{A}' \mathbf{G}_2' \mathbf{A}' = (\mathbf{A} \mathbf{G}_1)' (\mathbf{A} \mathbf{G}_2)' = \mathbf{A} \mathbf{G}_1 \mathbf{A} \mathbf{G}_2 = \mathbf{A} \mathbf{G}_2.
+$$
+Similarly,
+$$
+    \mathbf{G}_1 \mathbf{A} = (\mathbf{G}_1 \mathbf{A})' = \mathbf{A}' \mathbf{G}_1' = (\mathbf{A} \mathbf{G}_2 \mathbf{A})' \mathbf{G}_1' = \mathbf{A}' \mathbf{G}_2' \mathbf{A}' \mathbf{G}_1' = (\mathbf{G}_2 \mathbf{A})' (\mathbf{G}_1 \mathbf{A})' = \mathbf{G}_2 \mathbf{A} \mathbf{G}_1 \mathbf{A} = \mathbf{G}_2 \mathbf{A}.
+$$
+Hence,
+$$
+    \mathbf{G}_1 = \mathbf{G}_1 \mathbf{A} \mathbf{G}_1 = \mathbf{G}_1 \mathbf{A} \mathbf{G}_2 = \mathbf{G}_2 \mathbf{A} \mathbf{G}_2 = \mathbf{G}_2.
+$$
+    
+    Proof of existence: TODO later. We construct a matrix that satisfies (1)-(4) using the singular value decomposition (SVD) of $\mathbf{A}$.
+    
+- Following are true: 
+    1. $(\mathbf{A}^-)'$ is a generalized inverse of $\mathbf{A}'$. 
+    2. $(\mathbf{A}^+)' = (\mathbf{A}')^+$.  
+    3. For any nonzero $k$, $(1/k) \mathbf{A}^-$ is a generalized inverse of $k \mathbf{A}$.  
+    4. $(k \mathbf{A})^+ = (1/k) \mathbf{A}^+$.
+
+    Proof: Check properties (1)-(4). HW5.
+    
+- **Multiplication by generalized inverse does not change rank.**  
+    1. $\mathcal{C}(\mathbf{A}) = \mathcal{C}(\mathbf{A} \mathbf{A}^-)$ and $\mathcal{C}(\mathbf{A}') = \mathcal{C}((\mathbf{A}^- \mathbf{A})')$.  
+    2. $\text{rank}(\mathbf{A}) = \text{rank}(\mathbf{A} \mathbf{A}^-) = \text{rank}(\mathbf{A}^- \mathbf{A})$. 
+    
+    Proof of 1: We already know $\mathcal{C}(\mathbf{A}) \supseteq \mathcal{C}(\mathbf{A} \mathbf{A}^-)$. Now since $\mathbf{A} = \mathbf{A} \mathbf{A}^- \mathbf{A}$, we also have $\mathcal{C}(\mathbf{A}) \subseteq \mathcal{C}(\mathbf{A} \mathbf{A}^-)$.   
+    Proof of 2: Since $\mathbf{A} = \mathbf{A} \mathbf{A}^- \mathbf{A}$, $\text{rank}(\mathbf{A}) \le \text{rank}(\mathbf{A} \mathbf{A}^-) \le \text{rank}(\mathbf{A})$.  
+    
+- **Generalized inverse has equal or larger rank.**  $\text{rank}(\mathbf{A}^-) \ge \text{rank}(\mathbf{A})$.  
+
+    Proof: $\text{rank}(\mathbf{A}) = \text{rank}(\mathbf{A}\mathbf{A}^- \mathbf{A}) \le \text{rank}(\mathbf{A}\mathbf{A}^-) \le \text{rank}(\mathbf{A}^-)$.
+
+- **Moore-Penrose inverse has equal rank.**  $\text{rank}(\mathbf{A}^+) = \text{rank}(\mathbf{A})$.  
+
+    Proof: HW5.
+    
+- Let $\mathbf{A} \in \mathbb{R}^{m \times n}$.
+
+    1. If $\mathbf{A}$ has full column rank, then the MP inverse is $\mathbf{A}^+ = (\mathbf{A}'\mathbf{A})^{-1} \mathbf{A}'$. Given QR factorization $\mathbf{A} = \mathbf{Q} \mathbf{R}$, $\mathbf{A}^+ = \mathbf{R}^{-1} \mathbf{Q}'$.    
+    
+    2. If $\mathbf{A}$ has full row rank, then the MP inverse is $\mathbf{A}^+ = \mathbf{A}'(\mathbf{A} \mathbf{A}')^{-1}$.  Given QR factorization $\mathbf{A}' = \mathbf{Q} \mathbf{R}$, $\mathbf{A}^+ = \mathbf{Q} \mathbf{R}'^{-1}$. 
+
+```{julia}
+# a 3x2 matrix (full column rank)
+A = [-3 -4; 4 6; 1 1]
+```
+
+```{julia}
+# compute MP inverse using SVD
+pinv(A)
+```
+
+```{julia}
+# compute MP inverse using pseudo-inverse
+(A'A) \ A'
+```
+
+```{julia}
+# compute MP inverse by QR
+qra = qr(A)
+```
+
+```{julia}
+qra.R \ qra.Q[:, 1:2]'
+```
+
+## Linear equations
+
+- Solving linear system
+\begin{eqnarray*}
+a_{11} x_1 + \cdots + a_{1n} x_n &=& b_1 \\
+a_{21} x_1 + \cdots + a_{2n} x_n &=& b_2 \\
+&\vdots& \\
+a_{m1} x_1 + \cdots + a_{mn} x_n &=& b_m
+\end{eqnarray*}
+or
+$$
+    \mathbf{A} \mathbf{x} = \mathbf{b},
+$$
+where $\mathbf{A} \in \mathbb{R}^{m \times n}$ (coefficient matrix), $\mathbf{x} \in \mathbb{R}^n$ (solution vector), and $\mathbf{b} \in \mathbb{R}^m$ (right hand side) is a central theme in linear algebra. 
+
+
+### When is there a solution to $\mathbf{A} \mathbf{x} = \mathbf{b}$?
+
+- Theorem: The following statements are equivalent.
+
+    1. The linear system $\mathbf{A} \mathbf{x} = \mathbf{b}$ has a solution (**consistent**).
+
+    2. $\mathbf{b} \in {\cal C}(\mathbf{A})$.
+ 
+    3. $\text{rank}((\mathbf{A} \,\, \mathbf{b})) = \text{rank}(\mathbf{A})$.
+    
+    4. $\mathbf{A} \mathbf{A}^- \mathbf{b} = \mathbf{b}$.
+
+    Proof: Equivalence between 1, 2 and 3 is trivial. 4 implies 1: apparently $\tilde{\mathbf{x}} = \mathbf{A}^- \mathbf{b}$ is a solution to $\mathbf{A} \mathbf{x} = \mathbf{b}$. 1 implies 4: if $\tilde{\mathbf{x}}$ is a solution, then $\mathbf{b} = \mathbf{A} \tilde{\mathbf{x}} = \mathbf{A} \mathbf{A}^- \mathbf{A} \tilde{\mathbf{x}} = \mathbf{A} \mathbf{A}^- \mathbf{b}$.
+
+    The last equivalence gives some intuition why $\mathbf{A}^-$ is called an inverse.
+
+### How to characterize all solutions to $\mathbf{A} \mathbf{x} = \mathbf{b}$?
+
+- Let's first study the homogenous case $\mathbf{A} \mathbf{x} = \mathbf{0}$, which is always consistent (why?).
+
+    Theorem: $\tilde{\mathbf{x}}$ is a solution to $\mathbf{A} \mathbf{x} = \mathbf{0}$ if and only if $\tilde{\mathbf{x}} = (\mathbf{I}_n - \mathbf{A}^- \mathbf{A}) \mathbf{q}$ for some $\mathbf{q} \in \mathbb{R}^n$.
+
+    Proof: _If_: Apparently $(\mathbf{I}_n - \mathbf{A}^- \mathbf{A}) \mathbf{q}$ is a solution regardless value of $\mathbf{q}$ since $\mathbf{A} (\mathbf{I}_n - \mathbf{A}^- \mathbf{A}) = \mathbf{A} - \mathbf{A} = \mathbf{0}$. _Only if_: If $\tilde{\mathbf{x}}$ is a solution, then $\tilde{\mathbf{x}} = (\mathbf{I}_n - \mathbf{A}^- \mathbf{A}) \mathbf{q}$ by taking $\mathbf{q} = \tilde{\mathbf{x}}$.
+
+- Rephrasing above result, we have $\mathcal{N}(\mathbf{A}) = \mathcal{C}(\mathbf{I}_n - \mathbf{A}^- \mathbf{A})$. 
+
+- Remarks (optional):
+
+    1. The matrix $\mathbf{I}_n - \mathbf{A}^- \mathbf{A}$ is idempotent and is an oblique projection onto $\mathcal{N}(\mathbf{A})$.
+ 
+    2. The matrix $\mathbf{I}_n - \mathbf{A}^+ \mathbf{A}$ is symmetric and idempotent and is an orthogonal projection onto $\mathcal{N}(\mathbf{A})$.
+ 
+    3. The matrix $\mathbf{A} \mathbf{A}^-$ is idempotent and is an oblique projection onto $\mathcal{C}(\mathbf{A})$.
+ 
+    4. The matrix $\mathbf{A} \mathbf{A}^+$ is symmetric and idempotent and is an orthogonal projection onto $\mathcal{C}(\mathbf{A})$.
+
+- Now for the inhomogenous case $\mathbf{A} \mathbf{x} = \mathbf{b}$.
+
+    Theorem: If $\mathbf{A} \mathbf{x} = \mathbf{b}$ is consistent, then $\tilde{\mathbf{x}}$ is a solution if and only if
+    $$
+      \tilde{\mathbf{x}} = \mathbf{A}^- \mathbf{b} + (\mathbf{I}_n - \mathbf{A}^- \mathbf{A}) \mathbf{q} 
+    $$
+    for some $\mathbf{q} \in \mathbb{R}^n$.
+
+    Interpretation: **a specific solution** + **a vector in $\mathcal{N}(\mathbf{A})$**.
+
+    Proof:
+    \begin{eqnarray*}
+    & & \mathbf{A} \mathbf{x} = \mathbf{b} \\
+    &\Leftrightarrow& \mathbf{A} \mathbf{x} = \mathbf{A} \mathbf{A}^- \mathbf{b} \\
+    &\Leftrightarrow& \mathbf{A} (\mathbf{x} - \mathbf{A}^- \mathbf{b}) = \mathbf{0} \\
+    &\Leftrightarrow& \mathbf{x} - \mathbf{A}^- \mathbf{b} = (\mathbf{I}_n - \mathbf{A}^- \mathbf{A}) \mathbf{q} \text{ for some } \mathbf{q} \in \mathbb{R}^n \\
+    &\Leftrightarrow& \mathbf{x} = \mathbf{A}^- \mathbf{b} + (\mathbf{I}_n - \mathbf{A}^- \mathbf{A}) \mathbf{q} \text{ for some } \mathbf{q} \in \mathbb{R}^n.
+    \end{eqnarray*}
+
+- Corollary: $\mathbf{A} \mathbf{x} = \mathbf{b}$ is consistent for _all_ $\mathbf{b}$ if and only if $\mathbf{A}$ has full row rank.
+
+- Corollary: If a system is consistent, its solution is unique if and only if $\mathbf{A}$ has full column rank.
+
+## Invertible matrix
+
+Assume that a square $\mathbf{A} \in \mathbb{R}^{n \times n}$ has full row and column rank.
+
+- If a square $\mathbf{A}$ has full row and column rank, then $\mathbf{A}$ is **invertible** (or **nonsingular**).
+
+- Consider the left inverse $\mathbf{X}$ that satisifies $\mathbf{X} \mathbf{A} = \mathbf{I}$ and the right inverse $\mathbf{Y}$ that satisfies $\mathbf{A} \mathbf{Y} = \mathbf{I}$. Both left and right inverses exist (why?) and they are equal:
+$$
+\mathbf{X} = \mathbf{X} \mathbf{I} = \mathbf{X} \mathbf{A} \mathbf{Y} = \mathbf{I} \mathbf{Y} = \mathbf{Y}.
+$$
+Uniqueness of the left and right inverse follows from uniqueness of the basis expansion. 
+
+- We say that $\mathbf{A}$ is **invertible** (or **nonsingular**), and denote the (left and right) **inverse** by $\mathbf{A}^{-1}$.
+
+- The generalized inverse $\mathbf{A}^-$ is unique, which is the same as $\mathbf{A}^{-1}$.
+
+    Proof: Let $\mathbf{G}_1$ and $\mathbf{G}_2$ be two generalized inverses of $\mathbf{A}$. Then $\mathbf{A} \mathbf{G}_1 \mathbf{A} = \mathbf{A}$ and $\mathbf{A} \mathbf{G}_2 \mathbf{A} = \mathbf{A}$. Multiplying both equations by $\mathbf{A}^{-1}$ on the left and right, we obtain $\mathbf{G}_1 = \mathbf{A}^{-1} = \mathbf{G}_2$.
+
+- For any $\mathbf{b}$, the unique solution is $\mathbf{A}^{-1} \mathbf{b}$.
+
+### Examples of matrix inverse
+
+- Identity matrix $\mathbf{I}_n$ is invertible, with inverse $\mathbf{I}_n$. 
+
+- A diagonal matrix is invertible if all diagonal entries are nonzero.
+$$
+\text{diag}(a_{11}, \ldots, a_{nn})^{-1} = \text{diag}(a_{11}^{-1}, \ldots, a_{nn}^{-1}).
+$$
+
+- A $2 \times 2$ matrix is invertible if and only if $a_{11} a_{22} \ne a_{12} a_{21}$
+$$
+\begin{pmatrix}
+a_{11} & a_{12} \\
+a_{21} & a_{22}
+\end{pmatrix}^{-1} = \frac{1}{a_{11} a_{22} - a_{12} a_{21}} \begin{pmatrix}
+a_{22} & -a_{12} \\
+-a_{21} & a_{11}
+\end{pmatrix}.
+$$
+
+- Inverse of orthogonal matrix. If $\mathbf{A}$ is square and has orthonormal columns, then
+$$
+\mathbf{A}^{-1} = \mathbf{A}'.
+$$
+
+- Inverse of matrix transpose. If $\mathbf{A}$ is invertible, then
+$$
+(\mathbf{A}')^{-1} = (\mathbf{A}^{-1})'.
+$$
+
+- Inverse of matrix product. If $\mathbf{A}$ and $\mathbf{B}$ are invertible, then
+$$
+(\mathbf{A} \mathbf{B})^{-1} = \mathbf{B}^{-1} \mathbf{A}^{-1}.
+$$  
+
+## Solving linear equations - triangular systems
+
+- To solve $\mathbf{A} \mathbf{x} = \mathbf{b}$, where $\mathbf{A} \in \mathbb{R}^{n \times n}$ is **lower triangular**
+$$
+\begin{pmatrix}
+    a_{11} & 0 & \cdots & 0 \\
+    a_{21} & a_{22} & \cdots & 0 \\
+    \vdots & \vdots & \ddots & \vdots \\
+    a_{n1} & a_{n2} & \cdots & a_{nn}
+\end{pmatrix}
+\begin{pmatrix}
+x_1 \\ x_2 \\ \vdots \\ x_n
+\end{pmatrix} = \begin{pmatrix}
+b_1 \\ b_2 \\ \vdots \\ b_n
+\end{pmatrix}.
+$$
+
+    **Forward substitution** algorithm: 
+$$
+\begin{eqnarray*}
+    x_1 &=& b_1 / a_{11} \\
+    x_2 &=& (b_2 - a_{21} x_1) / a_{22} \\
+    x_3 &=& (b_3 - a_{31} x_1 - a_{32} x_2) / a_{33} \\
+    &\vdots& \\
+    x_n &=& (b_n - a_{n1} x_1 - a_{n2} x_2 - \cdots - a_{n,n-1} x_{n-1}) / a_{nn}.
+\end{eqnarray*}
+$$
+$1 + 3 + 5 + \cdots + (2n-1) = n^2$ flops. 
+
+- To solve $\mathbf{A} \mathbf{x} = \mathbf{b}$, where $\mathbf{A} \in \mathbb{R}^{n \times n}$ is upper triangular  
+$$
+\begin{pmatrix}
+    a_{11} & \cdots & a_{1,n-1} & a_{1n} \\
+    \vdots & \ddots & \vdots & \vdots \\
+    0 & \cdots & a_{n-1,n-1} & a_{n-1,n} \\
+    0 & 0 & 0 & a_{nn}
+\end{pmatrix}
+\begin{pmatrix}
+x_1 \\ \vdots \\ x_{n-1} \\ x_n
+\end{pmatrix} = \begin{pmatrix}
+b_1 \\ \vdots \\ b_{n-1} \\ b_n
+\end{pmatrix}.
+$$
+    **Back substitution** algorithm: 
+$$
+\begin{eqnarray*}
+    x_n &=& b_n / a_{nn} \\
+    x_{n-1} &=& (b_{n-1} - a_{n-1,n} x_n) / a_{n-1,n-1} \\
+    x_{n-2} &=& (b_{n-2} - a_{n-2,n-1} x_{n-1} - a_{n-2,n} x_n) / a_{n-2,n-2} \\
+    &\vdots& \\
+    x_1 &=& (b_1 - a_{12} x_2 - a_{13} x_3 - \cdots - a_{1,n} x_{n}) / a_{11}.
+\end{eqnarray*}
+$$
+$n^2$ flops.
+
+## Solving linear equations by QR
+
+- For an invertible matrix $\mathbf{A} \in \mathbb{R}^{n \times n}$ and $\mathbf{b} \in \mathbb{R}^n$, we can solve the linear equation $\mathbf{A} \mathbf{x} = \mathbf{b}$ by following steps.  
+    - Step 1: Compute QR factorization, e.g., by [Gram–Schmidt](https://ucla-biostat-216.github.io/2023fall/slides/02-vector/02-vector.html#how-to-orthonormalize-a-set-of-vectors-gram-schmidt-algorithm) or [Household algorithm](https://ucla-biostat-216.github.io/2023fall/hw/hw4/hw4.html#q3-household-reflections) (HW5): $\mathbf{A} = \mathbf{Q} \mathbf{R}$. $2n^3$ flops.  
+    - Step 2: Compute $\mathbf{Q}' \mathbf{b}$. $2n^2$ flops.  
+    - Step 3: Solve the triangular equation $\mathbf{R} \mathbf{x} = \mathbf{Q}' \mathbf{b}$ by back substitution. $n^2$ flops.   
+    
+    The total number of flops is $2n^3 + 3n^2 \approx 2n^3$.
+    
+- Factor-solve method with multiple right-hand sides. For multiple right hand sides $\mathbf{b}$, we only need to do Step 1 once.
+
+- Compute the inverse, $\mathbf{B}$, of an invertible matrix $\mathbf{A} \in \mathbb{R}^{n \times n}$.  
+    - Step 1. QR factorization $\mathbf{A} = \mathbf{Q} \mathbf{R}$.  
+    - Step 2. For $i=1,\ldots,n$, solve the triangular equation $\mathbf{R} \mathbf{b}_i = \mathbf{s}_i$, where $\mathbf{s}_i$ is the $i$-th row of $\mathbf{Q}$. 
+    
+    Total computational cost is $2n^3 + n^3 = 3n^3$ flops.  
+    
+- Question. Two ways to solve a linear system. `qr(A) \ b` vs `inv(A) * b`. Which way is better?
+
+## Solving linear equations by Gaussian elimination and LU factorization
+
+In this section, we (1) review the Gaussian elimination (GE) for solving linear equations  $\mathbf{A} \mathbf{x} = \mathbf{b}$, and then (2) show that GE leads to a useful decomposition 
+$$
+\mathbf{A} = \mathbf{L} \mathbf{U}.
+$$
+
+Remark: In practice, LU decomposition is used much less frequently than Cholesky decomposition in statistics and machinear learning because $\mathbf{A}$ is almost always symmetric and positive semidefinite in applications.
+
+### Gaussian elimination (GE)
+
+Let's review (from any undergraduate linear algebra textbook) how to solve a linear system
+$$
+\begin{pmatrix}
+2 & 1 & -1 \\ -3 & -1 & 2 \\ -2 & 1 & 2
+\end{pmatrix} \begin{pmatrix} x_1 \\ x_2 \\ x_3 \end{pmatrix} = 
+\begin{pmatrix}
+8 \\ -11 \\ -3
+\end{pmatrix}.
+$$
+
+**Stage 1**: Let's eliminate variable $x_1$ from equations (2) and (3).
+
+Multiplying equation (1) by $\ell_{21} = 3/2$ and adds to equation (2) leads to
+$$
+\begin{pmatrix}
+2 & 1 & -1 \\
+0 & 1/2 & 1/2 \\ -2 & 1 & 2
+\end{pmatrix} \begin{pmatrix} x_1 \\ x_2 \\ x_3 \end{pmatrix} = 
+\begin{pmatrix}
+8 \\ 1 \\ -3
+\end{pmatrix}.
+$$
+
+Multiplying equation (1) by $\ell_{31} = 1$ and adds to equation (3) leads to
+$$
+\begin{pmatrix}
+2 & 1 & -1 \\
+0 & 1/2 & 1/2 \\
+0 & 2 & 1
+\end{pmatrix} \begin{pmatrix} x_1 \\ x_2 \\ x_3 \end{pmatrix} = 
+\begin{pmatrix}
+8 \\ 1 \\ 5
+\end{pmatrix}.
+$$
+
+**Stage 2**: Let's eliminate variable $x_2$ from equation (3).
+
+Multiplying equation (2) by $\ell_{32} = -4$ and adds to equation (3) leads to
+$$
+\begin{pmatrix}
+2 & 1 & -1 \\
+0 & 1/2 & 1/2 \\
+0 & 0 & -1
+\end{pmatrix} \begin{pmatrix} x_1 \\ x_2 \\ x_3 \end{pmatrix} = 
+\begin{pmatrix}
+8 \\ 1 \\ 1
+\end{pmatrix}.
+$$
+
+**Stage 3**: Now we can collect results by **back-solve** or **back-substitution**.
+
+From the equation (3), $x_3 = -1$.  
+
+Substituting $x_3 = -1$ to equation (2) and solve for $x_2 = 3$.
+
+Substituting $x_2=3$ and $x_3 = 1$ to equation (1) and solve for $x_2 = 2$.
+
+This is essentially how computer solves linear equation:
+
+```{julia}
+using LinearAlgebra
+
+A = [2.0 1.0 -1.0; -3.0 -1.0 2.0; -2.0 1.0 2.0]
+```
+
+```{julia}
+b = [8.0, -11.0, -3.0]
+```
+
+```{julia}
+# Julia way to solve linear equation
+# equivalent to `solve(A, b)` in R
+A \ b
+```
+
+### LU decomposition
+
+Let's collect those multipliers $-\ell_{ij}$ into a unit lower triangular matrix $\mathbf{L}$
+
+```{julia}
+L = [1.0 0.0 0.0; -1.5 1.0 0.0; -1.0 4.0 1.0]
+```
+
+and save the resultant upper triangular matrix after GE into $\mathbf{U}$
+
+```{julia}
+U = [2.0 1.0 -1.0; 0.0 0.5 0.5; 0.0 0.0 -1.0]
+```
+
+Surprisingly, we find that $\mathbf{A} = \mathbf{L} \mathbf{U}$!
+
+```{julia}
+A ≈ L * U
+```
+
+- Theorem: For any nonsingular $\mathbf{A} \in \mathbb{R}^{n \times n}$, there exists a unique unit lower triangular matrix $\mathbf{L}$ and upper triangular matrix $\mathbf{U}$ such that
+$$
+\mathbf{A} = \mathbf{L} \mathbf{U}.
+$$
+
+- Given LU decomposition $\mathbf{A} = \mathbf{L} \mathbf{U}$, for a new right hand side $\mathbf{b}$, the solution to $\mathbf{A} \mathbf{x} = \mathbf{L} \mathbf{U} \mathbf{x} = \mathbf{b}$ is readily given by two triangular solves:
+\begin{eqnarray*}
+    \mathbf{L} \mathbf{y} &=& \mathbf{b} \\
+    \mathbf{U} \mathbf{x} &=& \mathbf{y}.
+\end{eqnarray*}
+
+- Indeed, computer performs GE/LU on a row-permuted version of $\mathbf{A}$ (pivoting) for numerical stability. That is 
+$$
+\mathbf{P} \mathbf{A} = \mathbf{L} \mathbf{U},
+$$
+where $\mathbf{P}$ is a permutation matrix. All multipliers $\ell_{ij}$ in $\mathbf{L}$ has magnitude $\le 1$.
+
+- Total computational cost of LU decomposition is $(2/3)n^3$ flops.
+
+- Remark: Total computational cost of the Cholesky decomposition is $(1/3)n^3$ flops.
+
+```{julia}
+A
+```
+
+```{julia}
+Alu = lu(A)
+```
+
+```{julia}
+Alu.p
+```
+
+```{julia}
+A[Alu.p, :] ≈ Alu.L * Alu.U
+```
