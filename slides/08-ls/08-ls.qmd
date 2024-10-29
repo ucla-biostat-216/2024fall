@@ -1,0 +1,121 @@
+---
+title: Least squares (BV Chapters 12-13)
+subtitle: Biostat 216
+author: Dr. Hua Zhou @ UCLA
+date: today
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    number-sections: true
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+jupyter:
+  jupytext:
+    formats: 'ipynb,qmd'
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.15.2
+  kernelspec:
+    display_name: Julia 1.10.5
+    language: julia
+    name: julia-1.10
+---
+
+## Method of least squares
+
+- In the previous lecture, we study when does a linear equation $\mathbf{A} \mathbf{x} = \mathbf{b}$ have solution and how to characterize all the solutions.  
+  
+- What if $\mathbf{A} \mathbf{x} = \mathbf{b}$ is **inconsistent**, i.e., there is no solution?  
+
+    A sensible question to ask is can we find an $\mathbf{x}$ such that $\mathbf{A} \mathbf{x}$ approximates $\mathbf{b}$ best? The **method of least squares** (due to Gauss) seeks to minimize
+\begin{eqnarray*}
+Q(\mathbf{x}) &=& \|\mathbf{b} - \mathbf{A} \mathbf{x}\|^2 \\
+&=& (\mathbf{b} - \mathbf{A} \mathbf{x})' (\mathbf{b} - \mathbf{A} \mathbf{x}) \\
+&=& \mathbf{b}' \mathbf{b} - 2 \mathbf{b}' \mathbf{A} \mathbf{x} + \mathbf{x}' \mathbf{A}' \mathbf{A} \mathbf{x}.
+\end{eqnarray*}
+
+- **Normal equation**. To find the minimum, we take derivative and set the gradient to zero
+$$
+\nabla Q(\mathbf{x}) = -2 \mathbf{A}' \mathbf{b} + 2 \mathbf{A}' \mathbf{A} \mathbf{x} = \mathbf{0}.
+$$
+This leads to the normal equation
+$$
+\mathbf{A}' \mathbf{A} \mathbf{x} = \mathbf{A}' \mathbf{b}.
+$$
+
+## Least squares solution
+
+- Is there a solution to the normal equation? This is answered in the last lecture and HW5.
+
+- Is the solution to the normal equation the minimizer to the least sqaures criterion $Q(\mathbf{x})$?
+
+    Answer: Any solution $\mathbf{x}$ to the normal equation minimizes the least squares criterion.
+
+    Optimization argument: Any stationarity point (points with zero gradient vector) of a convex function is a global minimum. Now the least squares criterion is convex because the Hessian  $\nabla^2 Q(\mathbf{x}) = \mathbf{A}' \mathbf{A}$ is positive semidefinite. Therefore any solution to the normal equation is a stationarity point and thus a global minimum.
+
+    Direct argument: Let $\hat{\mathbf{x}}$ be a solution to the normal equation. That is
+\begin{eqnarray*}
+& & \mathbf{A}' \mathbf{A} \hat{\mathbf{x}} = \mathbf{A}' \mathbf{b} \\
+&\Rightarrow& \mathbf{A}' (\mathbf{b} - \mathbf{A} \hat{\mathbf{x}}) = \mathbf{0} \\
+&\Rightarrow& \mathbf{b} - \mathbf{A} \hat{\mathbf{x}} \text{ is orthogonal to all columns of } \mathbf{A} \\
+&\Rightarrow& \mathbf{b} - \mathbf{A} \hat{\mathbf{x}} \in \mathcal{C}(\mathbf{A})^\perp = \mathcal{N}(\mathbf{A}').
+\end{eqnarray*}
+Therefore $\mathbf{b} = \mathbf{A} \hat{\mathbf{x}} + (\mathbf{b} - \mathbf{A} \hat{\mathbf{x}})$ where $\mathbf{A} \hat{\mathbf{x}} \in \mathcal{C}(\mathbf{A})$ and $\mathbf{b} - \mathbf{A} \hat{\mathbf{x}} \in \mathcal{C}(\mathbf{A})^\perp$. In other words, $\mathbf{A} \hat{\mathbf{x}}$ is the orthogonal projection of $\mathbf{b}$ into $\mathcal{C}(\mathbf{A})$. Then by the cloest point theorem, we know $Q(\mathbf{x})$ is minimized by $\hat{\mathbf{x}}$.
+
+- The direct argument also reveals that the _fitted values_ $\hat{\mathbf{b}} = \mathbf{A} \hat{\mathbf{x}}$ is invariant to the choice of the solution to the normal equation.
+
+- Now we know the normal equation is always consistent and we want to find all solution(s). In general the least squares solution can be represented as
+\begin{eqnarray*}
+& & (\mathbf{A}' \mathbf{A})^- \mathbf{A}' \mathbf{b} + [\mathbf{I} - (\mathbf{A}' \mathbf{A})^- (\mathbf{A}' \mathbf{A})] \mathbf{q} \\
+&=& (\mathbf{A}' \mathbf{A})^- \mathbf{A}' \mathbf{b} + (\mathbf{I} - \mathbf{A}^- \mathbf{A}) \mathbf{q},
+\end{eqnarray*}
+where $\mathbf{q}$ is arbitrary. One specific solution is 
+\begin{eqnarray*}
+	\hat{\mathbf{x}} = (\mathbf{A}' \mathbf{A})^- \mathbf{A}' \mathbf{b}
+\end{eqnarray*}
+with corresponding fitted values 
+\begin{eqnarray*}
+	\hat{\mathbf{b}} = \mathbf{A} (\mathbf{A}' \mathbf{A})^- \mathbf{A}' \mathbf{b}.
+\end{eqnarray*}
+
+- When is the least squares solution unique?  
+    The least squares solution is unique if and only if $\mathbf{A}$ has full column rank. The solution is given by $\hat{\mathbf{x}} = (\mathbf{A}' \mathbf{A})^{-1} \mathbf{A}' \mathbf{b}$.  
+
+    Proof: The solution to normal equation is unique if and only if $\mathbf{A}' \mathbf{A}$ has full (column) rank. Therefore $\mathbf{A}$ has full column rank as well.
+
+## Geometry of the least squares solution
+
+<img src="./ls_projection.png" width=400 align="center"/>
+
+- $(\mathbf{A}' \mathbf{A})^- \mathbf{A}'$ is a generalized inverse of $\mathbf{A}$.
+
+    Proof: HW5.
+
+- $\mathbf{P}_{\mathbf{A}} = \mathbf{A} (\mathbf{A}' \mathbf{A})^- \mathbf{A}'$ is the orthogonal projector onto $\mathcal{C}(\mathbf{A})$.
+
+    Since orthogonal projection is unique, $\mathbf{A} (\mathbf{A}' \mathbf{A})^- \mathbf{A}'$ is invariant to the choice of the generalized inverse $(\mathbf{A}' \mathbf{A})^-$ and thus can be denoted by $\mathbf{P}_{\mathbf{A}}$.
+
+- Whichever least squares solution $\hat{\mathbf{x}}$ we use, the fitted value $\hat{\mathbf{b}} = \mathbf{A} \hat{\mathbf{x}} = \mathbf{A} (\mathbf{A}' \mathbf{A})^- \mathbf{A}' \mathbf{b} = \mathbf{P}_{\mathbf{A}} \mathbf{b}$ is the same.
+
+- Geometry: The fitted value from the least squares solution $\hat{\mathbf{b}} = \mathbf{P}_{\mathbf{A}} \mathbf{b}$ is the orthogonal projection of the response vector $\mathbf{b}$ onto the column space $\mathcal{C}(\mathbf{A})$.
+
+- Decomposition of $\mathbf{b} = \mathbf{P}_{\mathbf{A}} \mathbf{b} + (\mathbf{I} - \mathbf{P}_{\mathbf{A}}) \mathbf{b} = \hat{\mathbf{b}} + \hat{\mathbf{e}}$, where $\hat{\mathbf{b}} \perp \hat{\mathbf{e}}$.
+
+## Solve least squares problems by QR
+
+Assume $\mathbf{A} \in \mathbb{R}^{m \times n}$ has full column rank and $\mathbf{b} \in \mathbb{R}^m$.
+
+- Step 1: Compute the (thin) QR factorization e.g., by [Gram–Schmidt](https://ucla-biostat-216.github.io/2024fall/slides/02-vector/02-vector.html#how-to-orthonormalize-a-set-of-vectors-gram-schmidt-algorithm) or [Householder algorithm](https://ucla-biostat-216.github.io/2024fall/hw/hw5/hw5.html#q4-household-reflections) (HW5): $\mathbf{A} = \mathbf{Q} \mathbf{R}$.
+
+- Step 2: Compute $\mathbf{Q}' \mathbf{b}$.
+
+- Step 3: Back substitution: Solve triangular system $\mathbf{R} \hat{\mathbf{x}} = \mathbf{Q}' \mathbf{b}$.
+
+- Remark: The only difference of this algorithm from the [QR approach for solving linear equation](https://ucla-biostat-216.github.io/2024fall/slides/07-matinv/07-matinv.html#solving-linear-equations-by-qr) is that $\mathbf{A}$ and $\mathbf{Q}$ can be tall.
+
+- Total number of flops is $2mn^2 + 2mn + n^2 \approx 2mn^2$.
