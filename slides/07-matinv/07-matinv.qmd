@@ -320,7 +320,7 @@ $n^2$ flops.
 ## Solving linear equations by QR
 
 - For an invertible matrix $\mathbf{A} \in \mathbb{R}^{n \times n}$ and $\mathbf{b} \in \mathbb{R}^n$, we can solve the linear equation $\mathbf{A} \mathbf{x} = \mathbf{b}$ by following steps.  
-    - Step 1: Compute QR factorization, e.g., by [Gram–Schmidt](https://ucla-biostat-216.github.io/2023fall/slides/02-vector/02-vector.html#how-to-orthonormalize-a-set-of-vectors-gram-schmidt-algorithm) or [Household algorithm](https://ucla-biostat-216.github.io/2023fall/hw/hw4/hw4.html#q3-household-reflections) (HW5): $\mathbf{A} = \mathbf{Q} \mathbf{R}$. $2n^3$ flops.  
+    - Step 1: Compute QR factorization, e.g., by [Gram–Schmidt](https://ucla-biostat-216.github.io/2024fall/slides/02-vector/02-vector.html#how-to-orthonormalize-a-set-of-vectors-gram-schmidt-algorithm) or [Householder algorithm](https://ucla-biostat-216.github.io/2024fall/hw/hw5/hw5.html#q4-household-reflections) (HW5): $\mathbf{A} = \mathbf{Q} \mathbf{R}$. $2n^3$ flops.  
     - Step 2: Compute $\mathbf{Q}' \mathbf{b}$. $2n^2$ flops.  
     - Step 3: Solve the triangular equation $\mathbf{R} \mathbf{x} = \mathbf{Q}' \mathbf{b}$ by back substitution. $n^2$ flops.   
     
