@@ -102,6 +102,8 @@ with corresponding fitted values
 
 - $\mathbf{P}_{\mathbf{A}} = \mathbf{A} (\mathbf{A}' \mathbf{A})^- \mathbf{A}'$ is the orthogonal projector onto $\mathcal{C}(\mathbf{A})$.
 
+    Proof: HW5.
+
     Since orthogonal projection is unique, $\mathbf{A} (\mathbf{A}' \mathbf{A})^- \mathbf{A}'$ is invariant to the choice of the generalized inverse $(\mathbf{A}' \mathbf{A})^-$ and thus can be denoted by $\mathbf{P}_{\mathbf{A}}$.
 
 - Whichever least squares solution $\hat{\mathbf{x}}$ we use, the fitted value $\hat{\mathbf{b}} = \mathbf{A} \hat{\mathbf{x}} = \mathbf{A} (\mathbf{A}' \mathbf{A})^- \mathbf{A}' \mathbf{b} = \mathbf{P}_{\mathbf{A}} \mathbf{b}$ is the same.
@@ -122,4 +124,4 @@ Assume $\mathbf{A} \in \mathbb{R}^{m \times n}$ has full column rank and $\mathb
 
 - Remark: The only difference of this algorithm from the [QR approach for solving linear equation](https://ucla-biostat-216.github.io/2024fall/slides/07-matinv/07-matinv.html#solving-linear-equations-by-qr) is that $\mathbf{A}$ and $\mathbf{Q}$ can be tall.
 
-- Total number of flops is $2mn^2 + 2mn + n^2 \approx 2mn^2$.
+- Total number of flops, using Gram-Schmidt, is $2mn^2 + 2mn + n^2 \approx 2mn^2$.

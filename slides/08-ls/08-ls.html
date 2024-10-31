@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Dr. Hua Zhou @ UCLA">
-<meta name="dcterms.date" content="2024-10-30">
+<meta name="dcterms.date" content="2024-10-31">
 
 <title>Least squares (BV Chapters 12-13)</title>
 <style>
@@ -3119,7 +3119,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 30, 2024</p>
+      <p class="date">October 31, 2024</p>
     </div>
   </div>
   
@@ -3182,6 +3182,7 @@ The least squares solution is unique if and only if <span class="math inline">\(
 <li><p><span class="math inline">\((\mathbf{A}&#39; \mathbf{A})^- \mathbf{A}&#39;\)</span> is a generalized inverse of <span class="math inline">\(\mathbf{A}\)</span>.</p>
 <p>Proof: HW5.</p></li>
 <li><p><span class="math inline">\(\mathbf{P}_{\mathbf{A}} = \mathbf{A} (\mathbf{A}&#39; \mathbf{A})^- \mathbf{A}&#39;\)</span> is the orthogonal projector onto <span class="math inline">\(\mathcal{C}(\mathbf{A})\)</span>.</p>
+<p>Proof: HW5.</p>
 <p>Since orthogonal projection is unique, <span class="math inline">\(\mathbf{A} (\mathbf{A}&#39; \mathbf{A})^- \mathbf{A}&#39;\)</span> is invariant to the choice of the generalized inverse <span class="math inline">\((\mathbf{A}&#39; \mathbf{A})^-\)</span> and thus can be denoted by <span class="math inline">\(\mathbf{P}_{\mathbf{A}}\)</span>.</p></li>
 <li><p>Whichever least squares solution <span class="math inline">\(\hat{\mathbf{x}}\)</span> we use, the fitted value <span class="math inline">\(\hat{\mathbf{b}} = \mathbf{A} \hat{\mathbf{x}} = \mathbf{A} (\mathbf{A}&#39; \mathbf{A})^- \mathbf{A}&#39; \mathbf{b} = \mathbf{P}_{\mathbf{A}} \mathbf{b}\)</span> is the same.</p></li>
 <li><p>Geometry: The fitted value from the least squares solution <span class="math inline">\(\hat{\mathbf{b}} = \mathbf{P}_{\mathbf{A}} \mathbf{b}\)</span> is the orthogonal projection of the response vector <span class="math inline">\(\mathbf{b}\)</span> onto the column space <span class="math inline">\(\mathcal{C}(\mathbf{A})\)</span>.</p></li>
@@ -3196,7 +3197,7 @@ The least squares solution is unique if and only if <span class="math inline">\(
 <li><p>Step 2: Compute <span class="math inline">\(\mathbf{Q}&#39; \mathbf{b}\)</span>.</p></li>
 <li><p>Step 3: Back substitution: Solve triangular system <span class="math inline">\(\mathbf{R} \hat{\mathbf{x}} = \mathbf{Q}&#39; \mathbf{b}\)</span>.</p></li>
 <li><p>Remark: The only difference of this algorithm from the <a href="https://ucla-biostat-216.github.io/2024fall/slides/07-matinv/07-matinv.html#solving-linear-equations-by-qr">QR approach for solving linear equation</a> is that <span class="math inline">\(\mathbf{A}\)</span> and <span class="math inline">\(\mathbf{Q}\)</span> can be tall.</p></li>
-<li><p>Total number of flops is <span class="math inline">\(2mn^2 + 2mn + n^2 \approx 2mn^2\)</span>.</p></li>
+<li><p>Total number of flops, u sing Gram-Schmidt is <span class="math inline">\(2mn^2 + 2mn + n^2 \approx 2mn^2\)</span>.</p></li>
 </ul>
 </section>
 
