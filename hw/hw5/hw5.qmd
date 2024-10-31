@@ -1,0 +1,97 @@
+---
+title: Biostat 216 Homework 5
+subtitle: 'Due Nov 15 @ 11:59pm'
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    number-sections: false
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+jupyter:
+  jupytext:
+    formats: 'ipynb,qmd'
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.15.2
+  kernelspec:
+    display_name: Julia 1.10.5
+    language: julia
+    name: julia-1.10
+---
+
+Submit a PDF (scanned/photographed from handwritten solutions, or converted from RMarkdown or Jupyter Notebook or Quarto) to Gradescope in BruinLearn. 
+
+## Q1
+
+Let $\mathbf{A} \in \mathbb{R}^{m \times n}$. Show the following properties of generalized inverses.
+
+1. For any generalized inverse $\mathbf{A}^-$, $\text{rank}(\mathbf{A}^-) \ge \text{rank}(\mathbf{A})$.
+
+2. $\text{rank}(\mathbf{A}^+) = \text{rank}(\mathbf{A})$.
+
+3. $(\mathbf{A}^-)'$ is a generalized inverse of $\mathbf{A}'$.
+
+4. $(\mathbf{A}^+)' = (\mathbf{A}')^+$.
+
+## Q2 Householder algorithm for QR factorization
+
+Let $\mathbf{v} \in \mathbb{R}^n$. Define the **Householder reflection matrix**
+$$
+\mathbf{H} = \mathbf{I} - 2 \frac{\mathbf{v} \mathbf{v}'}{\|\mathbf{v}\|^2} = \mathbf{I} - 2 \mathbf{u} \mathbf{u}',
+$$
+where $\mathbf{u}$ is the unit vector $\mathbf{v} / \|\mathbf{v}\|$.
+
+1. Show that $\mathbf{H}$ is symmetric and orthogonal.
+
+2. Let $\mathbf{a}, \mathbf{b} \in \mathbb{R}^n$ such that $\|\mathbf{a}\| = \|\mathbf{b}\|$. Find a Householder matrix such that $\mathbf{H} \mathbf{a} = \mathbf{b}$.
+
+3. Let $\mathbf{a} \in \mathbb{R}^n$ be a non-zero vector. Find a Householder matrix such that
+$$
+\mathbf{H} \mathbf{a} = \begin{pmatrix} \|\mathbf{a}\| \\ \mathbf{0}_{n-1} \end{pmatrix}.
+$$
+
+4. Let $\mathbf{a} \in \mathbb{R}^n$. Find a Householder matrix such that
+$$
+\mathbf{H} \mathbf{a} = \begin{pmatrix} a_1 \\ \|\mathbf{a}_{2:n}\| \\ \mathbf{0}_{n-2} \end{pmatrix}.
+$$
+
+5. Let $\mathbf{A} \in \mathbb{R}^{n \times p}$. Describe how to find a sequence of Householder matrices $\mathbf{H}_1, \ldots, \mathbf{H}_{p}$ such that
+$$
+\mathbf{H}_{p} \mathbf{H}_{p-1} \cdots \mathbf{H}_1 \mathbf{A} = \mathbf{R},
+$$
+where $\mathbf{R} \in \mathbb{R}^{n \times p}$ is an upper triangular matrix.  
+
+6. Describe how this generates a full QR decomposition of matrix $\mathbf{A} = \mathbf{Q} \mathbf{R}$, where $\mathbf{Q} \in \mathbb{R}^{n \times n}$ is an orthogonal matrix and $\mathbf{R}$ is upper triangular.
+
+## Q3
+
+1. For any $\mathbf{X} \in \mathbb{R}^{n \times p}$ and $\mathbf{y} \in \mathbb{R}^n$, show that the normal equation 
+$$
+\mathbf{X}' \mathbf{X} \boldsymbol{\beta} = \mathbf{X}' \mathbf{y}
+$$
+always has at least one solution.
+
+2. Show that $(\mathbf{A}' \mathbf{A})^- \mathbf{A}'$ is a generalized inverse of $\mathbf{A}$.
+
+3. $\mathbf{P}_{\mathbf{A}} = \mathbf{A} (\mathbf{A}' \mathbf{A})^- \mathbf{A}'$ is the orthogonal projector onto $\mathcal{C}(\mathbf{A})$.
+
+## Q4 Missile tracking
+
+A missile is fired from enemy territory, and its position in flight is observed by radar tracking devices at the following positions.
+
+| $x$=Position down range (1000 miles) | 0 |  0.25 |  0.5  |  0.75 |   1   |
+|:------------------------------------:|:-:|:-----:|:-----:|:-----:|:-----:|
+|        $y$=Height (1000 miles)       | 0 | 0.008 | 0.015 | 0.019 | 0.020 |
+
+Suppose that intelligence sources indicate that enemy missiles are programmed to follow a parabolic flight path: $y = f(x) = \alpha_0 + \alpha_1 x + \alpha_2 x^2$. Where is the missile expected to land? Hint: You can find the solution using computer program. For example, in Julia, least squares solution is obtained by command `A \ b`.
+
+![](missile.png)
+
+## BV exercises
+
+12.2, 12.4, 12.8
