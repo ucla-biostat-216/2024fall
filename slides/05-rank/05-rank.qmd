@@ -108,7 +108,7 @@ Let $\mathbf{A}$ be an $m \times n$ matrix
 
 - For any $m \times n$ matrix $\mathbf{A}$, its column rank is equal to the row rank, which we shall call the **rank** of $\mathbf{A}$.
 
-    We will give a simple proof using rank factorization below.
+    We will give two proofs below: one using the fundamental theorem of ranks, the other using rank factorization.
     
 - For any $\mathbf{A} \in \mathbb{R}^{m \times n}$, $\text{rank}(\mathbf{A}) \le \min \{m, n\}$.
 
@@ -240,7 +240,11 @@ nullity = size(nullspace(A), 2)
 
 - $\text{rank}(\mathbf{A}) = \text{rank}(\mathbf{A}') = \text{rank}(\mathbf{A}'\mathbf{A}) = \text{rank}(\mathbf{A}\mathbf{A}')$.
 
-    Proof: $\text{rank}(\mathbf{A}) = \text{rank}(\mathbf{A}')$ by definition of rank (row rank = column rank = rank). Early on we showed $\mathcal{N}(\mathbf{A}'\mathbf{A}) = \mathcal{N}(\mathbf{A})$. Thus $\text{nullity}(\mathbf{A}'\mathbf{A}) = \text{nullity}(\mathbf{A})$. Then by the rank-nullity theorem, $\text{rank}(\mathbf{A}'\mathbf{A}) = \text{rank}(\mathbf{A})$.
+    Proof: Early on we showed $\mathcal{N}(\mathbf{A}'\mathbf{A}) = \mathcal{N}(\mathbf{A})$. Thus $\text{nullity}(\mathbf{A}'\mathbf{A}) = \text{nullity}(\mathbf{A})$. Then by the rank-nullity theorem, $\text{rank}(\mathbf{A}'\mathbf{A}) = n - \text{nullity}(\mathbf{A}'\mathbf{A}) = n - \text{nullity}(\mathbf{A}) = \text{rank}(\mathbf{A})$. 
+    
+    Transposition gives $\text{rank}(\mathbf{A}\mathbf{A}') = \text{rank}(\mathbf{A}')$.  
+
+    Finally, $\text{rank}(\mathbf{A}) = \text{rank}(\mathbf{A}'\mathbf{A}) \le \text{rank}(\mathbf{A}') = \text{rank}(\mathbf{A}\mathbf{A}') \le \text{rank}(\mathbf{A})$, indicating $\text{rank}(\mathbf{A}) = \text{rank}(\mathbf{A}') = \text{rank}(\mathbf{A}'\mathbf{A}) = \text{rank}(\mathbf{A}\mathbf{A}')$.
     
 - Matrices of form $\mathbf{A}'\mathbf{A}$ or $\mathbf{A}\mathbf{A}'$ are called the **Gram matrix** or **Gramian matrix**.
 
@@ -312,7 +316,7 @@ i.e.,
 $$
 \text{column rank of } \mathbf{A} \le \text{row rank of } \mathbf{A}.
 $$
-Thus we have a proof of the famous result $\text{rank}(\mathbf{A}) = \text{rank}(\mathbf{A}')$.
+Thus we have another proof of the famous result $\text{rank}(\mathbf{A}) = \text{rank}(\mathbf{A}')$.
     
 - Let $\text{rank}(\mathbf{A}) = r$ and $\mathbf{A} = \mathbf{C} \mathbf{R}$ be a rank factorization. Then  
     1. $\text{rank}(\mathbf{C}) = \text{rank}(\mathbf{R}) = r$,
