@@ -1,0 +1,304 @@
+---
+title: Eigen-decomposition (BR Chapter 11)
+subtitle: Biostat 216
+author: Dr. Hua Zhou @ UCLA
+date: today
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    number-sections: true
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+jupyter:
+  jupytext:
+    formats: 'ipynb,qmd'
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.15.2
+  kernelspec:
+    display_name: Julia 1.9.3
+    language: julia
+    name: julia-1.9
+---
+
+# Eigenvalues and Eigenvectors
+
+- Let $\mathbf{A} \in \mathbb{R}^{n \times n}$ and 
+$$
+    \mathbf{A} \mathbf{x} = \lambda \mathbf{x}, \quad \mathbf{x} \ne \mathbf{0}.
+$$
+Then $\lambda$ is an **eigenvalue** of $\mathbf{A}$ with corresponding **eigenvector** $\mathbf{x}$.
+
+- Note if $\mathbf{x}$ is an eigenvector with eigenvalue $\lambda$, then $\alpha \mathbf{x}$ is also an eigenvector with same eigenvalue $\lambda$. Therefore eigenvectors are determined up to a scaling factor; in practice we often normalize eigenvectors to have unit $\ell_2$ norm.
+
+## Compute eigenvalues (by hand)
+
+- From eigen-equation $\mathbf{A} \mathbf{x} = \lambda \mathbf{x}$, we have
+$$
+(\lambda \mathbf{I} - \mathbf{A}) \mathbf{x} = \mathbf{0}.
+$$
+That is the marix $\lambda \mathbf{I} - \mathbf{A}$ must be singular and
+$$
+\det(\lambda \mathbf{I} - \mathbf{A}) = 0.
+$$
+
+- The $n$-degree polynomial
+$$
+    p_{\mathbf{A}}(\lambda) = \det(\lambda \mathbf{I} - \mathbf{A})
+$$
+is called the **characteristic polynomial**. Eigenvalues are the $n$ roots of $p_{\mathbf{A}}(\lambda)$ (fundamental theorem of algebra).
+
+- Example: For
+$$
+\mathbf{A} = \begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix},
+$$
+the characteristic polynomial is 
+$$
+p_{\mathbf{A}}(\lambda) = \det \begin{pmatrix} \lambda - 2 & -1 \\ -1 & \lambda - 2 \end{pmatrix} = \lambda^2 - 4 \lambda + 3 = (\lambda - 1)(\lambda - 3).
+$$
+Therefore $\mathbf{A}$'s eigenvalues are $\lambda_1 = 1$ and $\lambda_2 = 3$. Solving linear equations
+$$
+\begin{pmatrix} \lambda - 2 & -1 \\ -1 & \lambda - 2 \end{pmatrix} \mathbf{x} = \mathbf{0}
+$$
+now gives the corresponding eigenvectors
+$$
+\mathbf{x}_1 = \begin{pmatrix} 1 \\ -1 \end{pmatrix}, \quad \mathbf{x}_2 = \begin{pmatrix} 1 \\ 1 \end{pmatrix}.
+$$
+We observe that (1) $\text{tr}(\mathbf{A}) = \lambda_1 + \lambda_2$, (2) $\det(\mathbf{A}) = \lambda_1 \lambda_2$, and (3) the two eigenvectors are orthogonal to each other.
+
+```{julia}
+using LinearAlgebra
+
+A = [2.0 1.0; 1.0 2.0]
+```
+
+```{julia}
+eigen(A)
+```
+
+- Example: For the rotation matrix
+$$
+\mathbf{Q} = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix},
+$$
+same procedure shows eigen-pairs
+$$
+    \mathbf{Q} \begin{pmatrix} 1 \\ -i \end{pmatrix} = i \begin{pmatrix} 1 \\ -i \end{pmatrix}, \quad \mathbf{Q} \begin{pmatrix} 1 \\ i \end{pmatrix} = (-i) \begin{pmatrix} 1 \\ i \end{pmatrix}.
+$$
+The three properties (1)-(3) still hold.
+
+```{julia}
+Q = [0.0 -1.0; 1.0 0.0]
+```
+
+```{julia}
+eigen(Q)
+```
+
+- Some notations of complex number $x = a + b\sqrt{-1} = a + bi \in \mathbb{C}$. 
+    - Conjugate of a complex number: $x^* = (a + bi)^* = a - bi$.
+    - Modulus of a complex number: $|x| = \sqrt{a^2 + b^2} = \sqrt{x^*x}$.  
+    - Conjugate transpose of a complex vector: for $\mathbf{x} = \begin{pmatrix} x_1 \\ \vdots \\ x_n \end{pmatrix} \in \mathbb{C}^n$, $\mathbf{x}^* = (x_1^* \, \cdots x_n^*)$.  
+    - L2 norm of a complex vector: for $\mathbf{x} \in \mathbb{C}^n$, 
+\begin{eqnarray*}
+    \|\mathbf{x}\| &=& \sqrt{\mathbf{x}^* \mathbf{x}} \\
+    &=& \sqrt{(a_1 + b_1 i)(a_1 - b_1i) + \cdots + (a_n + b_n i)(a_n - b_ni)} \\
+    &=& \sqrt{|x_1|^2 + \cdots + |x_n|^2}.
+\end{eqnarray*}
+
+## Similar matrices
+
+- If $\mathbf{A} \mathbf{x} = \lambda \mathbf{x}$ and $\mathbf{B}$ is a nonsingular matrix of same size as $\mathbf{A}$, then
+$$
+    (\mathbf{B} \mathbf{A} \mathbf{B}^{-1}) (\mathbf{B} \mathbf{x}) = \mathbf{B} \mathbf{A} \mathbf{x} = \lambda (\mathbf{B} \mathbf{x}).
+$$
+That is $\mathbf{B} \mathbf{x}$ is an eigenvector of the matrix $\mathbf{B} \mathbf{A} \mathbf{B}^{-1}$. 
+
+    We say the matrix $\mathbf{B} \mathbf{A} \mathbf{B}^{-1}$ is **similar** to $\mathbf{A}$ because they share the same eigenvalues.
+
+## Diagonalizing a matrix
+
+- Collecting the $n$ eigen-equations
+$$
+    \mathbf{A} \mathbf{x}_i = \lambda_i \mathbf{x}_i, \quad i = 1,\ldots,n,
+$$
+into a matrix multiplication format gives
+$$
+    \mathbf{A} \mathbf{X} = \mathbf{X} \boldsymbol{\Lambda},
+$$
+where
+$$
+\boldsymbol{\Lambda} = \begin{pmatrix} \lambda_1 & & \\ & \ddots & \\ & & \lambda_n \end{pmatrix}
+$$
+If we assume that the $n$ eigenvectors are linearly independent (most matrices do, but **not all matrices**), then we have
+$$
+\mathbf{X}^{-1} \mathbf{A} \mathbf{X} = \boldsymbol{\Lambda}  \quad \quad \text{diagonalizing a matrix}
+$$
+or
+$$
+\mathbf{A} = \mathbf{X} \boldsymbol{\Lambda} \mathbf{X}^{-1}. \quad \quad \text{eigen-decomposition}.
+$$
+
+## Non-diagonalizable matrices
+
+- **Geometric multiplicity (GM)** of an eigenvalue $\lambda$: count the independent eigenvectors for $\lambda$, i.e., $\text{dim}(\mathcal{N}(\lambda \mathbf{I} - \mathbf{A}))$.
+
+- **Algebraic multiplicity (AM)** of an eigenvalue $\lambda$: count the repetition for $\lambda$. Look at the roots of characteristic polynomial $\det(\lambda \mathbf{I} - \mathbf{A})$.
+
+- Always $\text{GM} \le \text{AM}$.
+
+- The shortage of eigenvectors when $\text{GM} < \text{AM}$ means that $\mathbf{A}$ is **not diagonalizable**. There is no invertible matrix $\mathbf{X}$ such that $\mathbf{A} = \mathbf{X} \boldsymbol{\Lambda} \mathbf{X}^{-1}$.
+
+- Classical example of non-diagonalizable matrices:
+$$
+\mathbf{A} = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}.
+$$
+AM = 2, GM=1. Eigenvalue 0 is repeated twice but there is only one eigenvector $(1, 0)$.
+
+- More examples: all three matrices
+$$
+\begin{pmatrix} 5 & 1 \\ 0 & 5 \end{pmatrix}, \begin{pmatrix} 6 & -1 \\ 1 & 4 \end{pmatrix}, \begin{pmatrix} 7 & 2 \\ -2 & 3 \end{pmatrix}
+$$
+have AM=2 and GM=1.
+
+```{julia}
+eigen([0 1; 0 0])
+```
+
+```{julia}
+eigen([5 1; 0 5])
+```
+
+```{julia}
+eigen([6 -1; 1 4])
+```
+
+```{julia}
+eigen([7 2; -2 3])
+```
+
+## Some properties
+
+- Multiplying both sides of the eigen-equation $\mathbf{A} \mathbf{x} = \lambda \mathbf{x}$ by $\mathbf{A}$ gives
+$$
+\mathbf{A}^2 \mathbf{x} = \lambda \mathbf{A} \mathbf{x} = \lambda^2 \mathbf{x},
+$$
+showing that $\lambda^2$ is an eigenvalue of $\mathbf{A}^2$ with eigenvector $\mathbf{x}$. 
+
+    Similarly $\lambda^k$ is an eigenvalue of $\mathbf{A}^k$ with eigenvector $\mathbf{x}$.
+
+- For a diagonalizable matrix $\mathbf{A} = \mathbf{X} \boldsymbol{\Lambda} \mathbf{X}^{-1}$, we have
+$$
+\mathbf{A}^k = \mathbf{X} \boldsymbol{\Lambda}^k \mathbf{X}^{-1}.
+$$
+Recall that matrix multiplication is an expensive operation, $O(n^3)$ flops. This formula suggests we just need one eigen-decomposition to evaluate matrix powers.
+
+- **Shifting diagonal of $\mathbf{A}$ shifts all eigenvalues.** 
+$$
+(\mathbf{A} + s \mathbf{I}) \mathbf{x} = \lambda \mathbf{x} + s \mathbf{x} = (\lambda + s) \mathbf{x}.
+$$
+
+- $\mathbf{A}$ is singular if and only if it has at least one 0 eigenvalue.
+
+- Eigenvectors associated with distinct eigenvalues are linearly independent. 
+
+    Proof: Let 
+$$
+\mathbf{A} \mathbf{x}_1 = \lambda_1 \mathbf{x}_1, \quad \mathbf{A} \mathbf{x}_2 = \lambda_2 \mathbf{x}_2,
+$$
+and $\lambda_1 \ne \lambda_2$. Suppose $\mathbf{x}_1$ and $\mathbf{x}_2$ are linealy dependent. Then there is $\alpha \ne 0$ such that $\mathbf{x}_2 = \alpha \mathbf{x}_1$. Hence
+$$
+\alpha \lambda_1 \mathbf{x}_1 = \alpha \mathbf{A} \mathbf{x}_1 = \mathbf{A} \mathbf{x}_2 = \lambda_2 \mathbf{x}_2 = \alpha \lambda_2 \mathbf{x}_1,
+$$
+or $\alpha (\lambda_1 - \lambda_2) \mathbf{x}_1 = \mathbf{0}$. Since $\alpha \ne 0$, $\lambda_1 \ne \lambda_2$, $\mathbf{x}_1=\mathbf{0}$, a contradiction.
+
+- The eigenvalues of a triangular matrix are its diagonal entries.
+
+    Proof:
+$$
+p_{\mathbf{A}}(\lambda) = (\lambda - a_{11}) \cdots (\lambda - a_{nn}).
+$$
+
+- Eigenvalues of an idempotent matrix (i.e., an oblique projector) are either 0 or 1.
+
+    Proof: 
+$$
+\lambda \mathbf{x} = \mathbf{A} \mathbf{x} = \mathbf{A} \mathbf{A} \mathbf{x} = \lambda^2 \mathbf{x}.
+$$
+So $\lambda = \lambda^2$ or $\lambda =0, 1$.
+
+- Eigenvalues of an orthogonal matrix have complex modulus 1.
+
+    Proof: Since $\mathbf{A}' \mathbf{A} = \mathbf{I}$, 
+$$
+    \mathbf{x}^* \mathbf{x} = \mathbf{x}^* \mathbf{A}' \mathbf{A} \mathbf{x} = \lambda^* \lambda \mathbf{x}^* \mathbf{x}.
+$$
+Since $\mathbf{x}^* \mathbf{x} \ne 0$, we have $\lambda^* \lambda = |\lambda|^2 = 1$.
+
+- Let $\mathbf{A} \in \mathbb{R}^{n \times n}$ (not required to be diagonalizable), then $\text{tr}(\mathbf{A}) = \sum_i \lambda_i$ and $\det(\mathbf{A}) = \prod_i \lambda_i$ (HW6). The general version can be proved by the Jordan canonical form, a generalization of the eigen-decomposition.
+
+## Spectral decomposition for symmetric matrices (important)
+
+- For a symmetric matrix $\mathbf{A} \in \mathbb{R}^{n \times n}$, 
+    1. all eigenvalues of $\mathbf{A}$ are real, and
+    2. the eigenvectors corresponding to distinct eigenvalues are orthogonal to each other.
+    
+    Proof of 1 (optional): Pre-multiplying the eigen-equation $\mathbf{A} \mathbf{x} = \lambda \mathbf{x}$ by $\mathbf{x}^*$ (conjugate transpose) gives
+$$
+\mathbf{x}^* \mathbf{A} \mathbf{x} = \lambda \mathbf{x}^* \mathbf{x}.
+$$
+Let $\mathbf{x} = \mathbf{a} + \mathbf{b} i$ be the associated eigenvector. Now both
+$$
+\mathbf{x}^* \mathbf{x} = (\mathbf{a} + \mathbf{b} i)^* (\mathbf{a} + \mathbf{b} i) = (\mathbf{a}' - \mathbf{b}' i)(\mathbf{a} + \mathbf{b} i) = \mathbf{a}' \mathbf{a} + \mathbf{b}' \mathbf{b}
+$$
+and
+$$
+\mathbf{x}^* \mathbf{A} \mathbf{x} = (\mathbf{a}' - \mathbf{b}' i) \mathbf{A} (\mathbf{a} + \mathbf{b} i) = \mathbf{a}' \mathbf{A} \mathbf{a} + \mathbf{b}' \mathbf{A} \mathbf{b}
+$$
+are real numbers. Therefore $\lambda$ is a real number.
+
+    Proof of 2: Suppose
+$$
+\mathbf{A} \mathbf{x}_1 = \lambda_1 \mathbf{x}_1, \quad \mathbf{A} \mathbf{x}_2 = \lambda_2 \mathbf{x}_2,
+$$
+and $\lambda_1 \ne \lambda_2$. Then
+\begin{eqnarray*}
+    (\mathbf{A} - \lambda_2 \mathbf{I}) \mathbf{x}_1 &=& (\lambda_1 - \lambda_2) \mathbf{x}_1 \\
+    (\mathbf{A} - \lambda_2 \mathbf{I}) \mathbf{x}_2 &=& \mathbf{0}.
+\end{eqnarray*}
+Thus $\mathbf{x}_1 \in \mathcal{C}(\mathbf{A} - \lambda_2 \mathbf{I})$ and $\mathbf{x}_2 \in \mathcal{N}(\mathbf{A} - \lambda_2 \mathbf{I})$. By the fundamental theorem of linear algebra, $\mathbf{x}_1 \perp \mathbf{x}_2$.
+
+- Note a symmetric matrix certainly can have complex eigenvectors. For example, if $\mathbf{x}$ is a real eigenvector of $\mathbf{A}$, then $\mathbf{A} (i \mathbf{x}) = i (\mathbf{A} \mathbf{x}) = \lambda (i \mathbf{x})$. That is $i \mathbf{x}$ is a complex eigenvector of $\mathbf{A}$ with same eigenvalue. The next result is more important, which says we always have *enough* real eigenvectors for a symmetric matrix.
+
+- For a symmetric matrix, the algebraic multiplicity of a distinct eigenvalue always equals its geometric multiplicity, i.e., AM=GM. See [StackExhcange](https://math.stackexchange.com/a/4402827/1114963) for a self-contained proof (optional).
+
+- For an eigenvalue with multiplicity, we can choose its eigenvectors to be orthogonal to each other. Also we normalize each eigenvector to have unit L2 norm. Thus we obtain the extremely useful **spectral decomposition of a symmetric matrix**
+$$
+    \mathbf{A} = \mathbf{Q} \boldsymbol{\Lambda} \mathbf{Q}' = \begin{pmatrix} \mid & & \mid \\ \mathbf{q}_1 & \cdots & \mathbf{q}_n \\ \mid & & \mid \end{pmatrix} \begin{pmatrix} \lambda_1 & & \\ & \ddots & \\ & & \lambda_n \end{pmatrix} \begin{pmatrix} - & \mathbf{q}_1' & - \\ & \vdots & \\ - & \mathbf{q}_n' & - \end{pmatrix} = \sum_{i=1}^n \lambda_i \mathbf{q}_i \mathbf{q}_i',
+$$
+where $\mathbf{Q}$ is orthogonal (columns are eigenvectors) and $\boldsymbol{\Lambda} = \text{diag}(\lambda_1, \ldots, \lambda_n)$ (diagonal entries are eigenvalues).
+
+```{julia}
+A = [2.0 1.0; 1.0 2.0]
+```
+
+```{julia}
+Aeig = eigen(Symmetric(A))
+```
+
+```{julia}
+# eigenvectors are orthonormal
+Aeig.vectors' * Aeig.vectors
+```
+
+```{julia}
+Aeig.vectors * Diagonal(Aeig.values) * Aeig.vectors'
+```
+
+* For a symmetric matrix $\mathbf{A}$, the eigenvectors corresponding to non-zero eigenvalues are a basis for $\mathcal{C}(\mathbf{A})$. The eigenvectors corresponding to the zero eigenvalue are a basis for $\mathcal{N}(\mathbf{A})$. 
+
+    Proof: If $\mathbf{A} \mathbf{x} = \lambda \mathbf{x}$ and $\lambda \ne 0$, then $\mathbf{x} \in \mathcal{C}(\mathbf{A})$. If $\mathbf{A} \mathbf{x} = \lambda \mathbf{x}$ and $\lambda = 0$, then $\mathbf{x} \in \mathcal{N}(\mathbf{A})$. 
