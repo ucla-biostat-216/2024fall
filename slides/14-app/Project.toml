@@ -1,0 +1,13 @@
+[deps]
+COSMO = "1e616198-aa4e-51ec-90a2-23f7fbd31d8d"
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+Convex = "f65535da-76fb-5f13-bab9-19810c17039a"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+DistributionsAD = "ced4e74d-a319-5a8a-b0ac-84af2272839c"
+FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+PDMats = "90014a1f-27ba-587c-ab20-58faa44d9150"
+Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"

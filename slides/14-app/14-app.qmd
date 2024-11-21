@@ -1,0 +1,388 @@
+---
+title: Some Applications
+subtitle: Biostat 216
+author: Dr. Hua Zhou @ UCLA
+date: today
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    number-sections: true
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+    link-external-icon: true
+    link-external-newwindow: true
+comments:
+  hypothesis: true
+jupyter:
+  jupytext:
+    formats: 'ipynb,qmd'
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.15.2
+  kernelspec:
+    display_name: Julia 1.10.5
+    language: julia
+    name: julia-1.10
+---
+
+```{julia}
+using Pkg
+Pkg.activate(pwd())
+Pkg.instantiate()
+Pkg.status()
+```
+
+## Spectral clustering
+
+* Spectral clusting is one commonly used clustering approach in machine learning. [ScikitLearn tutorial](https://scikit-learn.org/1.5/auto_examples/cluster/plot_cluster_comparison.html#sphx-glr-auto-examples-cluster-plot-cluster-comparison-py). 
+
+* Given an undirected, weighted graph $G=(V, E)$, we can define the **weighted adjacency matrix** $\mathbf{W}=(w_{ij})_{i,j=1,...,n}$ with nonnegative weights $w_{ij}$. $w_{ij}=0$ means that the vertices $v_i$ and $v_j$ are not connected. The degree of a vertex $v_i$ is $d_i = \sum_{j=1}^n w_{ij}$.
+
+* The **unnormalized graph Laplacian** is
+$$
+\mathbf{L} = \mathbf{D} - \mathbf{W},
+$$
+where $\mathbf{D} = \text{diag}(d_1,\ldots,d_n)$.
+
+* Exercise: For this graph, what is $\mathbf{L}$?
+
+<img src="./Weighted_network.png" width="300" align="center"/>
+
+* Properties of the unnormalized graph Laplacian:
+
+    1. For every vector $\mathbf{f} \in \mathbb{R}^n$, we have
+    $$
+    \mathbf{f}' \mathbf{L} \mathbf{f} = \frac 12 \sum_{i,j=1}^n w_{ij} (f_i - f_j)^2.
+    $$  
+    Proof: BV exercises 3.21, 7.9.
+
+    2. $\mathbf{L}$ is symmetric and positive semidefinite.  
+    Proof: Part 1.
+
+    3. The smallest eigenvalue of $\mathbf{L}$ is 0, the corresponding eigenvector is the constant one vector $\mathbf{1}_n$.   
+    Proof: Obvious.
+
+    4. $\mathbf{L}$ has non-negative, real-valued eigenvalues $0 = \lambda_1 \le \lambda_2 \le \cdots \le \lambda_n$.
+ 
+    5. (Number of connected components and the spectrum of $\mathbf{L}$) The multiplicity $k$ of the eigenvalue 0 of $\mathbf{L}$ equals the number of connected components $A_1,\ldots,A_k$ in the graph. The eigenspace of eigenvalue 0 is spanned by the indicator vectors $\mathbf{1}_{A_1}, \ldots, \mathbf{1}_{A_k}$ of those components.
+ 
+* **Normalized graph Laplacians**. There are two versions of normalized graph Laplacians in the literature:
+$$
+\mathbf{L}_{\text{sym}} = \mathbf{D}^{-1/2} \mathbf{L} \mathbf{D}^{-1/2} = \mathbf{I} - \mathbf{D}^{-1/2} \mathbf{W} \mathbf{D}^{-1/2}
+$$
+and 
+$$
+\mathbf{L}_{\text{rw}} = \mathbf{D}^{-1} \mathbf{L} = \mathbf{I} - \mathbf{D}^{-1} \mathbf{W}.
+$$
+
+* **Unnormalized spectral clustering algorithm**.   
+    Input: A similarity matrix $\mathbf{S} \in \mathbb{R}^{n \times n}$ and number $k$ of clusters to construct.  
+    1. Construct a similarity graph. Let $\mathbf{W}$ be its weighted adjacency matrix.  
+    2. Compute the unnormalized Laplacian $\mathbf{L}$.
+    3. Computer the first $k$ eigenvectors $\mathbf{u}_1, \ldots, \mathbf{u}_k$.
+    4. Let $\mathbf{U} = (\mathbf{u}_1 \cdots \mathbf{u}_k) \in \mathbb{R}^{n \times k}$.
+    5. Treat rows of $\mathbf{U}$ as data points in $\mathbb{R}^k$ and cluster them using the $k$-means algorithm into clusters $C_1,\ldots,C_k$.  
+    Output: Clusters $A_1,\ldots,A_k$ according to $C_1,\ldots,C_k$.
+
+* **Normalized spectral clustering** according to [Shi and Malik (2000)](https://people.eecs.berkeley.edu/~malik/papers/SM-ncut.pdf)   
+    Input: A similarity matrix $\mathbf{S} \in \mathbb{R}^{n \times n}$ and number $k$ of clusters to construct.  
+    1. Construct a similarity graph. Let $\mathbf{W}$ be its weighted adjacency matrix.  
+    2. Compute the unnormalized Laplacian $\mathbf{L}$.
+    3. Computer the first $k$ generalized eigenvectors $\mathbf{u}_1, \ldots, \mathbf{u}_k$ of the **generalized eigenproblem** $\mathbf{L} \mathbf{u} = \lambda \mathbf{D} \mathbf{U}$.  
+    4. Let $\mathbf{U} = (\mathbf{u}_1 \cdots \mathbf{u}_k) \in \mathbb{R}^{n \times k}$.
+    5. Treat rows of $\mathbf{U}$ as data points in $\mathbb{R}^k$ and cluster them using the $k$-means algorithm into clusters $C_1,\ldots,C_k$.  
+    Output: Clusters $A_1,\ldots,A_k$ according to $C_1,\ldots,C_k$.
+
+    Remark: Generalized eigenproblem $\mathbf{L} \mathbf{u} = \lambda \mathbf{D} \mathbf{U}$ is same as the eigenproblem $\mathbf{L}_{\text{rw}} \mathbf{u} = \lambda \mathbf{u}$.
+
+* **Normalized spectral clustering** according to [Ng, Jordan, and Weiss (2002)](https://proceedings.neurips.cc/paper_files/paper/2001/file/801272ee79cfde7fa5960571fee36b9b-Paper.pdf)   
+    Input: A similarity matrix $\mathbf{S} \in \mathbb{R}^{n \times n}$ and number $k$ of clusters to construct.  
+    1. Construct a similarity graph. Let $\mathbf{W}$ be its weighted adjacency matrix.  
+    2. Compute the normalized Laplacian $\mathbf{L}_{\text{sym}}$.
+    3. Computer the first $k$ generalized eigenvectors $\mathbf{u}_1, \ldots, \mathbf{u}_k$ of $\mathbf{L}_{\text{sym}}$.  
+    4. Let $\mathbf{U} = (\mathbf{u}_1 \cdots \mathbf{u}_k) \in \mathbb{R}^{n \times k}$.
+    5. Form the matrix $\mathbf{T} \in \mathbf{R}^{n \times k}$ from $\mathbf{U}$ by normalizing the rows to norm 1.  
+    6. Treat rows of $\mathbf{T}$ as data points in $\mathbb{R}^k$ and cluster them using the $k$-means algorithm into clusters $C_1,\ldots,C_k$.  
+    Output: Clusters $A_1,\ldots,A_k$ according to $C_1,\ldots,C_k$.
+
+## Matrix completion
+
+* Snapshot of the kind of data collected by Netflix. Only 100,480,507 ratings (1.2% entries of the 480K-by-18K matrix) are observed
+
+<img src="./netflix_matrix.png" width="500" align="center"/>
+
+* Netflix challenge: impute the unobserved ratings for personalized recommendation.
+http://en.wikipedia.org/wiki/Netflix_Prize
+
+<img src="./netflix_prize.png" width="500" align="center"/>
+
+* **Matrix completion problem**. Observe a very sparse matrix $\mathbf{Y} = (y_{ij})$. Want to impute all the missing entries. It is possible only when the matrix is structured, e.g., of _low rank_.
+
+* Example: Load the 128×128 Lena picture with missing pixels.
+
+```{julia}
+using FileIO, Images
+
+lena = load("lena128missing.png")
+```
+
+```{julia}
+# convert to real matrices
+Y = Float64.(lena)
+```
+
+We fill out the missing pixels uisng a **matrix completion** technique developed by Candes and Tao
+$$
+    \text{minimize } \|\mathbf{X}\|_*
+$$
+$$
+    \text{subject to } x_{ij} = y_{ij} \text{ for all observed entries } (i, j).
+$$
+Here $\|\mathbf{M}\|_* = \sum_i \sigma_i(\mathbf{M})$ is the nuclear norm. In words we seek the matrix with minimal nuclear norm that agrees with the observed entries. This is a semidefinite programming (SDP) problem readily solved by modern convex optimization software.
+
+We use the convex optimizaion package COSMO.jl to solve for this semi-definite program.
+
+```{julia}
+# # Use COSMO solver
+using Convex, COSMO
+solver = COSMO.Optimizer
+
+# Linear indices of obs. entries
+obsidx = findall(Y[:] .≠ 0.0)
+# Create optimization variables
+X = Variable(size(Y))
+# Set up optmization problem
+problem = minimize(nuclearnorm(X))
+problem.constraints += X[obsidx] == Y[obsidx]
+# Solve the problem by calling solve
+@time solve!(problem, solver) # fast
+```
+
+```{julia}
+colorview(Gray, X.value)
+```
+
+## Compressed sensing
+
+* **Compressed sensing** [Candes and Tao (2006)](https://doi.org/10.1109/TIT.2006.885507) and [Donoho (2006)](https://doi.org/10.1109/TIT.2006.871582) tries to address a fundamental question: how to compress and transmit a complex signal (e.g., musical clips, mega-pixel images), which can be decoded to recover the original signal?
+
+<img src="./david-donoho.jpg" width="100"/>
+<img src="./emmanuel-candes.png" width="100"/>
+<img src="./terrence-tao.png" width="100"/>
+
+* Suppose a signal $\mathbf{x} \in \mathbb{R}^n$ is sparse with $s$ non-zeros. We under-sample the signal by multiplying a (flat) measurement matrix $\mathbf{y} = \mathbf{A} \mathbf{x}$, where $\mathbf{A} \in \mathbb{R}^{m\times n}$ has iid normal entries. [Candes, Romberg and Tao (2006)](https://doi.org/10.1002/cpa.20124) show that the solution to
+$$
+\begin{eqnarray*}
+	&\text{minimize}& \|\mathbf{x}\|_1 \\
+	&\text{subject to}& \mathbf{A} \mathbf{x} = \mathbf{y}
+\end{eqnarray*}
+$$
+exactly recovers the true signal under certain conditions on $\mathbf{A}$ when $n \gg s$ and $m \approx s \ln(n/s)$. Why sparsity is a reasonable assumption? _Virtually all real-world images have low information content_.
+
+<img src="./movie-scene.png" width="400"/>
+
+Generate a sparse signal and sub-sampling:
+
+```{julia}
+using CairoMakie, Makie, Random
+
+# random seed
+Random.seed!(123)
+# Size of signal
+n = 1024
+# Sparsity (# nonzeros) in the signal
+s = 10
+# Number of samples (undersample by a factor of 8) 
+m = 128
+
+# Generate and display the signal
+x0 = zeros(n)
+x0[rand(1:n, s)] = randn(s)
+# Generate the random sampling matrix
+A = randn(m, n) / m
+# Subsample by multiplexing
+y = A * x0
+
+# plot the true signal
+f = Figure()
+Makie.Axis(
+    f[1, 1], 
+    title = "True Signal x0",
+    xlabel = "x",
+    ylabel = "y"
+)
+lines!(1:n, x0)
+f
+```
+
+Solve the linear programming problem.
+
+```{julia}
+# Use COSMO solver
+solver = COSMO.Optimizer
+# MOI.set(solver, MOI.RawOptimizerAttribute("max_iter"), 5000)
+
+# Set up optimizaiton problem
+x = Variable(n)
+problem = minimize(norm(x, 1))
+problem.constraints += A * x == y
+
+# Solve the problem
+@time solve!(problem, solver)
+```
+
+```{julia}
+# Display the solution
+f = Figure()
+Makie.Axis(
+    f[1, 1], 
+    title = "Reconstructed signal overlayed with x0",
+    xlabel = "x",
+    ylabel = "y"
+)
+scatter!(1:n, x0, label = "truth")
+lines!(1:n, vec(x.value), label = "recovery")
+axislegend(position = :lt)
+f
+```
+
+## Automatic differentiation (Auto-Diff)
+
+Last week we scratched the surface of matrix/vector calculus and chain rules. Recent surge of machine learning sparked rapid advancement of automatic differentiation, which applies chain rule to the computer code to obtain exact gradients (up to machine precision).
+
+### Example: multivariate normal
+
+Define log-likelihood function.
+
+```{julia}
+using Distributions, DistributionsAD, LinearAlgebra, PDMats, Random, Zygote
+
+Random.seed!(216)
+n, p = 100, 3
+Y = randn(p, n) # each column of Y is a sample
+```
+
+```{julia}
+# log-likelihood evaluator
+mnlogl = (θ) -> loglikelihood(MvNormal(θ[:μ], θ[:Ω]), Y)
+```
+
+```{julia}
+# log-likelihood at (μ = 0, Ω = I)
+θ = (μ = zeros(p), Ω = Matrix{Float64}(I(p)))
+mnlogl(θ)
+```
+
+Calculate gradient by auto-diff.
+
+```{julia}
+# gradient of log-likeliohod at (μ = 0, Ω = I)
+θ̄ = Zygote.gradient(mnlogl, θ)[1];
+```
+
+```{julia}
+θ̄[:μ]
+```
+
+```{julia}
+θ̄[:Ω]
+```
+
+Let us check whether auto-diff yields the same answer as our analytical derivations.
+
+```{julia}
+# analytical gradient dL/dμ = Ω^{-1} ∑ᵢ (yᵢ - μ)
+θ̄[:μ] ≈ θ[:Ω] \ sum(Y .- θ[:μ], dims = 2)
+```
+
+```{julia}
+# analytical gradient dL/dΩ = -n/2 Ω^{-1} + 1/2 Ω^{-1} ∑ᵢ (yᵢ - μ)(yᵢ - μ)' Ω^{-1}
+θ̄[:Ω] ≈ - (n/2) * inv(θ[:Ω]) + 0.5 * inv(θ[:Ω]) * ((Y .- θ[:μ]) * (Y .- θ[:μ])') * inv(θ[:Ω])
+```
+
+Surprise! Gradients of the covariance matrix do not match. Close inspection reveals that Julia calculates the gradient with respect to the upper triangular part of the covariance matrix $\text{vech}(\Omega)$
+
+```{julia}
+# gradient with respect to vech(Ω)
+θ̄[:Ω]
+```
+
+```{julia}
+# gradient wrt vec(Ω)
+- (n/2) * inv(θ[:Ω]) + 0.5 * inv(θ[:Ω]) * ((Y .- θ[:μ]) * (Y .- θ[:μ])') * inv(θ[:Ω])
+```
+
+### Example: factor analysis
+
+Now let's try the more complicated factor analysis, where $\boldsymbol{\Omega} = \mathbf{F} \mathbf{F}' + \mathbf{D}$.
+
+```{julia}
+# log-likelihood evaluator
+falogl = (θ) -> loglikelihood(MvNormal(θ[:F] * θ[:F]' + diagm(θ[:d])), Y)
+```
+
+```{julia}
+r = 2
+# log-likelihood at (F = ones(p, 2), d = ones(p))
+θ = (F = ones(p, r), d = ones(p))
+falogl(θ)
+```
+
+```{julia}
+# gradient of log-likeliohod at (F = ones(p, 2), d = ones(p))
+θ̄ = Zygote.gradient(falogl, θ)[1];
+```
+
+```{julia}
+# auto-diff gradient wrt F
+θ̄[:F]
+```
+
+```{julia}
+# analytic gradient wrt F
+Ω = θ[:F] * θ[:F]' + diagm(θ[:d])
+S = Y * Y' / n
+- n * inv(Ω) * θ[:F] + n * inv(Ω) * S * inv(Ω) * θ[:F]
+```
+
+```{julia}
+# auto-diff gradient wrt d
+θ̄[:d]
+```
+
+```{julia}
+# analytic gradient wrt d
+- (n / 2) * diag(inv(Ω) -  inv(Ω) * S * inv(Ω))
+```
+
+Hessian (second derivatives) is essentially gradient of gradient. ForwardDiff.jl is better for Hessian calculation.
+
+```{julia}
+using ForwardDiff
+
+# HFF = ∂²L/∂F∂F'
+ForwardDiff.jacobian(F -> Zygote.gradient(falogl, (F = F, d = ones(p)))[1][:F], θ[:F])
+```
+
+```{julia}
+# Hdd = ∂²L/∂d∂d'
+ForwardDiff.jacobian(d -> Zygote.gradient(falogl, (F = θ[:F], d = d))[1][:d], θ[:d])
+```
+
+```{julia}
+# Hθθ = ∂²L/∂θ∂θ'
+
+# gradient function with vector input and vector output
+falogl_grad = function(θvec)
+    θ = (F = reshape(θvec[1:(p * r)], p, r), d = θvec[(p * r + 1):(p * r + p)])
+    θ̄ = Zygote.gradient(falogl, θ)[1]
+    return [vec(θ̄[:F]); vec(θ̄[:d])]
+end
+
+ForwardDiff.jacobian(falogl_grad, [vec(θ[:F]); vec(θ[:d])])
+```
