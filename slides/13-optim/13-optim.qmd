@@ -191,7 +191,7 @@ where $\boldsymbol{\Omega} = \mathbf{F} \mathbf{F}' + \mathbf{D}$.
     - Inequality constraints: $\mathbf{x} \ge \mathbf{0}$.  
     - Integer constraints: Each $x_i$ is either 0 or 1.
     
-- Statisticians often talk about *maximization*, because of the maximum likelihood estimation (MLE). Note maximizing $f$ is same as minimizing $-f$. 
+- Statisticians often talk about *maximization*, because of the maximum likelihood estimation (MLE). Maximizing $f$ is same as minimizing $-f$. 
 
 - Local minimum, strict local minimum, and global minimum:
 
@@ -260,7 +260,7 @@ for all $\mathbf{x}, \mathbf{y}$ and $\alpha \in (0, 1)$.
 
 - **Intersection of convex sets is convex.**
 
-    Proof: HW6 Q14.1.
+    Proof: HW7 Q8.1.
 
 - **The maximum of two or more (potentially infinitely many) convex functions is always convex.**  
 
@@ -273,7 +273,7 @@ $$
 f(\alpha \mathbf{x} + (1 - \alpha) \mathbf{y}) \le \alpha f(\mathbf{x}) + (1 - \alpha) f(\mathbf{y}).
 $$
 
-    (Geometric) proof: HW6 Q14.2.
+    (Geometric) proof: HW7 Q8.2.
 
     Note the minimum of convex functions is usually not convex.   
         
