@@ -30,3 +30,4 @@ books/
 .ipynb_checkpoints
 hw?sol.*
 hw/midterm
+hw/final
