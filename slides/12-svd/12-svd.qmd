@@ -346,7 +346,7 @@ svd(H)
 
 - Why are all eigenvalues of a square matrix less than or equal to $\sigma_1$? 
 
-    Answer: Recall that trthogonal matrices preserve vector length. Using the full SVD $\mathbf{A} = \mathbf{U} \boldsymbol{\Sigma} \mathbf{V}'$, 
+    Answer: Recall that orthogonal matrices preserve vector length. Using the full SVD $\mathbf{A} = \mathbf{U} \boldsymbol{\Sigma} \mathbf{V}'$, 
 $$
 \|\mathbf{A} \mathbf{x}\| = \|\mathbf{U} \boldsymbol{\Sigma} \mathbf{V}' \mathbf{x}\| = \|\boldsymbol{\Sigma} \mathbf{V}' \mathbf{x}\| \le \sigma_1 \|\mathbf{V}' \mathbf{x}\| = \sigma_1 \|\mathbf{x}\|.
 $$
@@ -407,7 +407,7 @@ pinv(A)
 
 ## Eckart-Young theorem: best approximation to a matrix
 
-- Let's first look at an image compression example from <https://www.mathworks.com/content/mathworks/www/en/company/newsletters/articles/professor-svd.html>.
+- Let's first look at an image compression example from <https://www.mathworks.com/company/technical-articles/professor-svd.html?s_tid=srchtitle>.
 
 ```{julia}
 img = load("golub-561-838-rank-120.jpg")
@@ -477,7 +477,7 @@ $$
 \|\mathbf{Q}_1 \mathbf{A} \mathbf{Q}_2'\| = \|\mathbf{A}\| \text{ for orthogonal } \mathbf{Q}_1 \text{ and } \mathbf{Q}_2.
 $$
 
-    Proof: HW6.
+    Proof: HW7 Q7.
 
 - **Eckart-Young theorem.** Assuming SVD of $\mathbf{A} \in \mathbb{R}^{m \times n}$ with rank $r$:
 $$
@@ -570,7 +570,7 @@ $$
 $$
 Thus the optimal $\mathbf{x}$ must be an eigenvector of $\mathbf{S} = \mathbf{A}' \mathbf{A}$ with corresponding eigenvalue $f(\mathbf{x})$. Which one shall we choose? Apparently the **top right singular vector** $\mathbf{x}^\star = \mathbf{v}_1$ gives us the maximal value which is equal to $\lambda_1 = \sigma_1^2$.
 
-    In HW6, you show this result using an alternative proof (elementary linear algebra arguments).
+    In HW7 Q3, you show this result using an alternative proof (elementary linear algebra arguments).
 
 - Above we have shown
 $$
@@ -613,7 +613,7 @@ $$
 \sigma_1 (\mathbf{B}) \le \sigma_1 (\mathbf{A}).
 $$
 
-    Proof: HW6 Q12. Hint: use Rayleigh quotient.
+    Proof: HW7 Q6. Hint: use Rayleigh quotient.
 
 ```{julia}
 svd(A[1:3, 1:2])
