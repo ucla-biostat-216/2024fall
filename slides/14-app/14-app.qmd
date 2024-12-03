@@ -257,7 +257,10 @@ Last week we scratched the surface of matrix/vector calculus and chain rules. Re
 
 ### Example: multivariate normal
 
-Define log-likelihood function.
+Define log-likelihood function
+$$
+\ell(\boldsymbol{\mu}, \boldsymbol{\Omega}) = - \frac{1}{2} \log \det \boldsymbol{\Omega} - \frac{1}{2} (\boldsymbol{y} - \boldsymbol{\mu})' \boldsymbol{\Omega}^{-1} (\boldsymbol{y} - \boldsymbol{\mu}).
+$$
 
 ```{julia}
 using Distributions, DistributionsAD, LinearAlgebra, PDMats, Random, Zygote
@@ -278,7 +281,7 @@ mnlogl = (θ) -> loglikelihood(MvNormal(θ[:μ], θ[:Ω]), Y)
 mnlogl(θ)
 ```
 
-Calculate gradient by auto-diff.
+Calculate gradient by auto-diff (reverse-mode).
 
 ```{julia}
 # gradient of log-likeliohod at (μ = 0, Ω = I)
@@ -334,7 +337,7 @@ falogl(θ)
 ```
 
 ```{julia}
-# gradient of log-likeliohod at (F = ones(p, 2), d = ones(p))
+# gradient of log-likeliohod at (F = ones(p, 2), d = ones(p)), reserse-mode
 θ̄ = Zygote.gradient(falogl, θ)[1];
 ```
 
@@ -351,7 +354,7 @@ S = Y * Y' / n
 ```
 
 ```{julia}
-# auto-diff gradient wrt d
+# auto-diff gradient wrt d, reserse-mode
 θ̄[:d]
 ```
 
@@ -360,7 +363,7 @@ S = Y * Y' / n
 - (n / 2) * diag(inv(Ω) -  inv(Ω) * S * inv(Ω))
 ```
 
-Hessian (second derivatives) is essentially gradient of gradient. ForwardDiff.jl is better for Hessian calculation.
+Hessian (second derivatives) is essentially gradient of gradient. ForwardDiff.jl (forward-mode) is better for Hessian calculation.
 
 ```{julia}
 using ForwardDiff

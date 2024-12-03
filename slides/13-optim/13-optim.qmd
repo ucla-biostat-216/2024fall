@@ -166,6 +166,8 @@ plt = wireframe!(plt, grid, grid, ĝx, label="f", fillalpha = 0.5)
 
 * We will practice use of these results in homework problems.
 
+* Also be aware of the recent advances in the auto-diff technology. See, e.g., [JuliaDiff](https://github.com/JuliaDiff) and [examples](https://ucla-biostat-216.github.io/2024fall/slides/14-app/14-app.html#automatic-differentiation-auto-diff).
+
 * Example: Take derivative of the [Rayleigh quotient](https://ucla-biostat-216.github.io/2024fall/slides/12-svd/12-svd.html#singular-vectors-and-rayleigh-quotient).
 
 * Example: Take derivative of the function $f(\mathbf{C}, \mathbf{R}) = \|\mathbf{A} - \mathbf{C} \mathbf{R}\|_{\text{F}}^2$ in the proof of the [Eckart-Young theorem](https://ucla-biostat-216.github.io/2024fall/slides/12-svd/12-svd.html#eckart-young-theorem-best-approximation-to-a-matrix).

@@ -4868,6 +4868,7 @@ e^{2z_1 + z_2}
 <li><p>Deriving derivative and Hessian of functions with vector or matrix argument can be tedious and frustrating. The key is to adopt a consistent notation that enables chain rule. Familiarize yourself with the content of this <a href="https://ucla-biostat216-2019fall.github.io/slides/16-matrixcalc/16-matrixcalc.html">lecture</a>. It can be one of the most useful notes for your graduate study and research projects.</p></li>
 <li><p>Some notations such as Kronecker product and commutation matrix appear in the above lecture note. Basic properties of these matrices are summarized in this <a href="https://ucla-biostat216-2019fall.github.io/slides/13-kron/13-kron.html">lecture note</a>.</p></li>
 <li><p>We will practice use of these results in homework problems.</p></li>
+<li><p>Also be aware of the recent advances in the auto-diff technology. See, e.g., <a href="https://github.com/JuliaDiff">JuliaDiff</a> and <a href="https://ucla-biostat-216.github.io/2024fall/slides/14-app/14-app.html#automatic-differentiation-auto-diff">examples</a>.</p></li>
 <li><p>Example: Take derivative of the <a href="https://ucla-biostat-216.github.io/2024fall/slides/12-svd/12-svd.html#singular-vectors-and-rayleigh-quotient">Rayleigh quotient</a>.</p></li>
 <li><p>Example: Take derivative of the function <span class="math inline">\(f(\mathbf{C}, \mathbf{R}) = \|\mathbf{A} - \mathbf{C} \mathbf{R}\|_{\text{F}}^2\)</span> in the proof of the <a href="https://ucla-biostat-216.github.io/2024fall/slides/12-svd/12-svd.html#eckart-young-theorem-best-approximation-to-a-matrix">Eckart-Young theorem</a>.</p></li>
 <li><p>Example: <a href="https://ucla-biostat-216.github.io/2024fall/hw/hw7/hw7.html#q11-mle-of-multivariate-normal">HW7 Q11</a>. Take derivative of the multivariate normal log-density.</p></li>
@@ -5085,7 +5086,7 @@ x^{(t+1)} - 2 = \frac 12 \left( x^{(t)} + \frac{4}{x^{(t)}} \right) - 2 = \frac{
 <li>In practice, the Newton’s method may suffer from <strong>instability</strong>; the iterates may escape into infinities or a local maximum. Two remedies are needed:
 <ol type="1">
 <li>Use a positive definite matrix in the quadratic approximation (automatically satisfied by the Hessian of a strictly convex function).</li>
-<li>Line search (backtracking) to guarantee sufficient drop in the objective function. <span class="math display">\[\begin{eqnarray*}
+<li>Line search (backtracking) to guarantee a sufficient drop in the objective function. <span class="math display">\[\begin{eqnarray*}
 &amp; &amp; f(\mathbf{x}^{(t)} + s \Delta \mathbf{x}) - f(\mathbf{x}^{(t)}) \\
 &amp;=&amp; f(\mathbf{x}^{(t)}) + s \cdot \nabla f(\mathbf{x}^{(t)})&#39; \Delta \mathbf{x} + o(s) - f(\mathbf{x}^{(t)}) \\
 &amp;=&amp; - s \cdot \nabla f(\mathbf{x}^{(t)})&#39; [\nabla^2 f(\mathbf{x}^{(t)})]^{-1} \nabla f(\mathbf{x}^{(t)}) + o(s) \\
