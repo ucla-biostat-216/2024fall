@@ -160,7 +160,7 @@ plt = wireframe!(plt, grid, grid, ĝx, label="f", fillalpha = 0.5)
 
 ## Chain rule for multivariate calculus
 
-* Deriving derivative and Hessian of functions with vector or matrix argument can be frustrating. The key is to adopt a consistent notation that enables chain rule. Familiarize yourself with the content of this [lecture](https://ucla-biostat216-2019fall.github.io/slides/16-matrixcalc/16-matrixcalc.html). It can be one of the most useful notes for your graduate study and research projects.
+* Deriving derivative and Hessian of functions with vector or matrix argument can be tedious and frustrating. The key is to adopt a consistent notation that enables chain rule. Familiarize yourself with the content of this [lecture](https://ucla-biostat216-2019fall.github.io/slides/16-matrixcalc/16-matrixcalc.html). It can be one of the most useful notes for your graduate study and research projects.
 
 * Some notations such as Kronecker product and commutation matrix appear in the above lecture note. Basic properties of these matrices are summarized in this [lecture note](https://ucla-biostat216-2019fall.github.io/slides/13-kron/13-kron.html).
 
@@ -397,7 +397,7 @@ Note the nonnegativity constraint is automatically satisfied.
 
 ### Example: [HW7, Q12](https://ucla-biostat-216.github.io/2024fall/hw/hw7/hw7.html#q12-smallest-matrix-subject-to-linear-constraints) (Smallest matrix subject to linear constraints)
 
-### Example: [HW6, Q13](https://ucla-biostat-216.github.io/2024fall/hw/hw7/hw7.html#q13-minimizing-a-convex-quadratic-form-over-manifold) (Minimizing a convex quadratic form over manifold)
+### Example: [HW7, Q13](https://ucla-biostat-216.github.io/2024fall/hw/hw7/hw7.html#q13-minimizing-a-convex-quadratic-form-over-manifold) (Minimizing a convex quadratic form over manifold)
 
 ## Newton-Raphson method for optimization
 
@@ -443,8 +443,8 @@ x^{(t+1)} - 2 = \frac 12 \left( x^{(t)} + \frac{4}{x^{(t)}} \right) - 2 = \frac{
 $$
 
 - In practice, the Newton's method may suffer from **instability**; the iterates may escape into infinities or a local maximum. Two remedies are needed:  
-    1. Use a positive definite matrix in the quadratic approximation (automatically satisfied by the Hessian of a convex function). 
-    2. Line search (backtracking) to guarantee sufficient drop in the objective function.
+    1. Use a positive definite matrix in the quadratic approximation (automatically satisfied by the Hessian of a strictly convex function). 
+    2. Line search (backtracking) to guarantee a sufficient drop in the objective function.
 \begin{eqnarray*}
 & & f(\mathbf{x}^{(t)} + s \Delta \mathbf{x}) - f(\mathbf{x}^{(t)}) \\
 &=& f(\mathbf{x}^{(t)}) + s \cdot \nabla f(\mathbf{x}^{(t)})' \Delta \mathbf{x} + o(s) - f(\mathbf{x}^{(t)}) \\

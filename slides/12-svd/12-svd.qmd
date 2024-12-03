@@ -384,7 +384,7 @@ $$
 
 ## SVD and generalized inverse
 
-Using the SVD, the [Moore-Penrose inverse](https://ucla-biostat-216.github.io/2023fall/slides/07-matinv/07-matinv.html#generalized-inverse-and-moore-penrose-inverse) is given by
+Using the SVD, the [Moore-Penrose inverse](https://ucla-biostat-216.github.io/2024fall/slides/07-matinv/07-matinv.html#generalized-inverse-and-moore-penrose-inverse) is given by
 $$
 \mathbf{A}^+ = \mathbf{V} \boldsymbol{\Sigma}^+ \mathbf{U}^T = \mathbf{V}_r \boldsymbol{\Sigma}_r^{-1} \mathbf{U}_r' = \sum_{i=1}^r \sigma_i^{-1} \mathbf{v}_i \mathbf{u}_i',
 $$
